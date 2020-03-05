@@ -11,17 +11,18 @@ public class CoulombChargeBehaviour : MonoBehaviour, IResetObject, IGenerateE
     [SerializeField]
     private Material highlightMaterial;
 
-    [Header("Particle Settings")]
-    [Tooltip("Sets the charge value of the Charge. This should be a value between -10 and 10 micro Coulomb.")]
-
+    [Header("Assessment System")]
     [SerializeField]
-    private QuantityFloat charge = 0.0f;
+    [Tooltip("Sets the charge value of the Charge. This should be a value between -10 and 10 micro Coulomb.")]
+    public QuantityFloat charge = 0.0f;
+
     public float Charge
     {
         get => charge;
         set => charge.Value = value;
     }
 
+    [Header("Particle Settings")]
     [SerializeField]
     private float maxChargeValue = 5f;
 
@@ -68,7 +69,12 @@ public class CoulombChargeBehaviour : MonoBehaviour, IResetObject, IGenerateE
             transform.localRotation = Quaternion.Euler(0, 0, 0);
             GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionZ;
         }
+    }
 
+    private void GetCoulombLogic()
+    {
+        var obj  = GameObject.Find("CoulombLogic");
+        if (obj) _coulombLogic = obj.GetComponent<CoulombLogic>();
     }
 
     private void Update()
@@ -129,8 +135,10 @@ public class CoulombChargeBehaviour : MonoBehaviour, IResetObject, IGenerateE
     public void UpdateCalculations()
     {
         _rigidbody.velocity = Vector3.zero;
-        if(_collided < 3)
+        if (_collided < 3)
+        {
             transform.position = _updatePosition;
+        }
     }
 
     private void OnCollisionEnter(Collision other)
@@ -190,5 +198,4 @@ public class CoulombChargeBehaviour : MonoBehaviour, IResetObject, IGenerateE
         UpdateResetPosition();
         SimulationController.Instance.ResetSimulation();
     }
-    
 }

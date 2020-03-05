@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Object = System.Object;
 
 [System.Serializable]
 public class ModeChangeEvent : UnityEvent<bool>
@@ -108,6 +110,26 @@ public class CoulombLogic : MonoBehaviour, IResetWholeObject
         if (IsIn2dMode())
             return distanceWorldSpace / (local? _worldToCalcSpaceFactor2dLocal : _worldToCalcSpaceFactor2d);
         return distanceWorldSpace / (local? _worldToCalcSpaceFactor3dLocal : _worldToCalcSpaceFactor3d);
+    }
+    
+    public Vector3 WorldToCalcSpace(Transform position)
+    {
+        if (IsIn2dMode())
+        {
+            var originPos = xOrigin2d.position;
+            var calculationPos = position.position;
+            return new Vector3(WorldToCalcSpace(Mathf.Abs(originPos.x - calculationPos.x)), 
+                WorldToCalcSpace(Mathf.Abs(originPos.y - calculationPos.y)), 0f);
+        }
+        else
+        {
+            //3d mode
+            var originPos = xOrigin3d.localPosition;
+            var calculatePos = position.localPosition;
+            return new Vector3(WorldToCalcSpace(Mathf.Abs(originPos.x - calculatePos.x), true),
+                WorldToCalcSpace(Mathf.Abs(originPos.y - calculatePos.y), true),
+                WorldToCalcSpace(Mathf.Abs(originPos.z - calculatePos.z), true));
+        }
     }
 
     public Vector3 CalcToWorldSpace(Vector3 distance, bool local = false)

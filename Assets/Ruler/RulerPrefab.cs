@@ -1,4 +1,5 @@
 ﻿using System;
+using Maroon.Physics;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -19,7 +20,7 @@ public class RulerPrefab : MonoBehaviour, IResetWholeObject
     public RulerDistanceEvent onDistanceChanged;
 
     private CoulombLogic _coulombLogic;
-    private float _oldDistance;
+    public QuantityFloat currentDistance;
     
     // Start is called before the first frame update
     void Start()
@@ -34,7 +35,7 @@ public class RulerPrefab : MonoBehaviour, IResetWholeObject
             _coulombLogic = simControllerObject.GetComponent<CoulombLogic>();
         Debug.Assert(_coulombLogic != null);
         
-        _oldDistance = 0;
+        currentDistance = 0;
         onDistanceChanged.Invoke(0f);
     }
 
@@ -49,16 +50,16 @@ public class RulerPrefab : MonoBehaviour, IResetWholeObject
             RulerLine.SetPosition(1, RulerEnd.transform.position);
             var newDist = _coulombLogic.WorldToCalcSpace(Vector3.Distance(RulerStart.transform.position, RulerEnd.transform.position));
 
-            if (Math.Abs(newDist - _oldDistance) > 0.0001f)
+            if (Math.Abs(newDist - currentDistance) > 0.0001f)
             {
-                _oldDistance = newDist;
-                onDistanceChanged.Invoke(_oldDistance);
+                currentDistance = newDist;
+                onDistanceChanged.Invoke((float)currentDistance);
             }
         }
         else if(RulerLine.gameObject.activeSelf)
         { 
             RulerLine.gameObject.SetActive(false);
-            _oldDistance = 0f;
+            currentDistance = 0f;
             onDistanceChanged.Invoke(0f);
         }
     }

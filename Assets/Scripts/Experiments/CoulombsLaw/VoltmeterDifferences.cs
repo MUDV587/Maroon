@@ -2,24 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using Maroon.Physics;
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(TextMeshProUGUI))]
 public class VoltmeterDifferences : MonoBehaviour
 {
     public VoltmeterMeasuringPoint positiveMeasuringPoint;
     public VoltmeterMeasuringPoint negativeMeasuringPoint;
 
     private CoulombLogic _coulombLogic;
-    private TextMeshProUGUI _textMeshProUgui;
+    public TextMeshProUGUI textMeshProGUI;
 
-    private float _currentValue;
+    [Header("Assessment System")]
+    public QuantityFloat currentValue;
     
     // Start is called before the first frame update
     void Start()
     {
-        _textMeshProUgui = GetComponent<TextMeshProUGUI>();
         var simControllerObject = GameObject.Find("CoulombLogic");
         if (simControllerObject)
             _coulombLogic = simControllerObject.GetComponent<CoulombLogic>();
@@ -29,27 +29,28 @@ public class VoltmeterDifferences : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (!textMeshProGUI) return;
         if (!positiveMeasuringPoint.isActiveAndEnabled || !negativeMeasuringPoint.isActiveAndEnabled)
-            _textMeshProUgui.text = "--- " + GetCurrentUnit();
+            textMeshProGUI.text = "--- " + GetCurrentUnit();
         else
         {
-            _textMeshProUgui.text = GetDifference() + " " + GetCurrentUnit();
+            textMeshProGUI.text = GetDifference() + " " + GetCurrentUnit();
         }
     }
     
     private string GetDifference(){
-        _currentValue = positiveMeasuringPoint.GetPotentialInMicroVolt() - negativeMeasuringPoint.GetPotentialInMicroVolt();
+        currentValue = positiveMeasuringPoint.GetPotentialInMicroVolt() - negativeMeasuringPoint.GetPotentialInMicroVolt();
         return GetCurrentFormattedString();
     }
 
     private string GetCurrentFormattedString()
     {
-        var check = _currentValue;
+        float check = currentValue;
         for (var cnt = 0; Mathf.Abs(check) < 1f && cnt < 2; ++cnt)
         {
             check *= Mathf.Pow(10, 3);
         }
-            
+
 //        Debug.Log("START: " + _currentValue.ToString("F") + " - END: "+ check.ToString("F"));
         return check.ToString("F");   
     }
@@ -57,7 +58,7 @@ public class VoltmeterDifferences : MonoBehaviour
     private string GetCurrentUnit()
     {
         var unit = "V";
-        var check = _currentValue;
+        var check = currentValue;
         if (check > 1f)
             return unit;
         check *= Mathf.Pow(10, 3);

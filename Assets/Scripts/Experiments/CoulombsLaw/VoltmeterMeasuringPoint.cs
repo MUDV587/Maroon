@@ -1,4 +1,5 @@
 ﻿using System;
+using Maroon.Physics;
 using UnityEditor.Experimental.UIElements.GraphView;
 using UnityEngine;
 using UnityEngine.Events;
@@ -11,6 +12,8 @@ public class VoltmeterMeasuringPoint : MonoBehaviour, IResetWholeObject
     public IField field;
     public VoltmeterEvent onVoltageChanged;
     public VoltmeterEvent onVoltageChangedUnit;
+
+    public QuantityVector3 calculatedPosition;
     
     private CoulombLogic _coulombLogic;
     private float _potential;
@@ -126,5 +129,10 @@ public class VoltmeterMeasuringPoint : MonoBehaviour, IResetWholeObject
         if(_coulombLogic)
             gameObject.transform.parent = _coulombLogic.transform.parent;
         onVoltageChanged.Invoke("---");
+    }
+
+    public void RecalculatePosition()
+    {
+        
     }
 }
