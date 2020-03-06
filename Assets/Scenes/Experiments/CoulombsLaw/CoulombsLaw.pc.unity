@@ -14912,12 +14912,12 @@ GameObject:
   m_Component:
   - component: {fileID: 947975673}
   - component: {fileID: 947975674}
-  - component: {fileID: 947975676}
   - component: {fileID: 947975675}
   - component: {fileID: 947975677}
   - component: {fileID: 947975680}
   - component: {fileID: 947975679}
   - component: {fileID: 947975678}
+  - component: {fileID: 947975676}
   m_Layer: 0
   m_Name: Voltmeter
   m_TagString: Untagged
@@ -14955,19 +14955,24 @@ MonoBehaviour:
   negativeMeasuringPoint: {fileID: 941569013}
   textMeshProGUI: {fileID: 1006991358}
   currentValue:
+    assessmentName: voltage
+    isDynamic: 0
     _value: 0
     onValueChanged:
       m_PersistentCalls:
+        m_Calls: []
+    onValueChangedWithName:
+      m_PersistentCalls:
         m_Calls:
         - m_Target: {fileID: 947975676}
-          m_MethodName: OnAttributeValueChanged
-          m_Mode: 5
+          m_MethodName: OnAttributeValueChanged2
+          m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
             m_IntArgument: 0
             m_FloatArgument: 0
-            m_StringArgument: voltage
+            m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
 --- !u!114 &947975675
@@ -14984,6 +14989,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   observingObject: {fileID: 941569005}
   position:
+    assessmentName: 
+    isDynamic: 0
     _value: {x: 0, y: 0, z: 0}
     onValueChanged:
       m_PersistentCalls:
@@ -14999,6 +15006,9 @@ MonoBehaviour:
             m_StringArgument: positive_terminal_position
             m_BoolArgument: 0
           m_CallState: 2
+    onValueChangedWithName:
+      m_PersistentCalls:
+        m_Calls: []
   observeLocal: 1
   tolerance: 0.00001
 --- !u!114 &947975676
@@ -15073,6 +15083,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   observingObject: {fileID: 941569012}
   position:
+    assessmentName: 
+    isDynamic: 0
     _value: {x: 0, y: 0, z: 0}
     onValueChanged:
       m_PersistentCalls:
@@ -15088,6 +15100,9 @@ MonoBehaviour:
             m_StringArgument: negative_terminal_position
             m_BoolArgument: 0
           m_CallState: 2
+    onValueChangedWithName:
+      m_PersistentCalls:
+        m_Calls: []
   observeLocal: 1
   tolerance: 0.00001
 --- !u!1 &948728817
@@ -26020,6 +26035,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   observingObject: {fileID: 2001467413}
   position:
+    assessmentName: 
+    isDynamic: 0
     _value: {x: 0, y: 0, z: 0}
     onValueChanged:
       m_PersistentCalls:
@@ -26035,6 +26052,9 @@ MonoBehaviour:
             m_StringArgument: end_position
             m_BoolArgument: 0
           m_CallState: 2
+    onValueChangedWithName:
+      m_PersistentCalls:
+        m_Calls: []
   observeLocal: 1
   tolerance: 0.00001
 --- !u!114 &1747568419
@@ -26066,6 +26086,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   observingObject: {fileID: 2001467414}
   position:
+    assessmentName: 
+    isDynamic: 0
     _value: {x: 0, y: 0, z: 0}
     onValueChanged:
       m_PersistentCalls:
@@ -26081,6 +26103,9 @@ MonoBehaviour:
             m_StringArgument: start_position
             m_BoolArgument: 0
           m_CallState: 2
+    onValueChangedWithName:
+      m_PersistentCalls:
+        m_Calls: []
   observeLocal: 1
   tolerance: 0.00001
 --- !u!114 &1747568421

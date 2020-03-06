@@ -6,6 +6,7 @@ public class CoulombAssessmentPosition : MonoBehaviour
 {
     public Transform observingObject = null;
     
+    [SerializeField]
     public QuantityVector3 position;
     public bool observeLocal = true;
     [Range(0f, 0.1f)]
@@ -26,7 +27,7 @@ public class CoulombAssessmentPosition : MonoBehaviour
             _transform = observingObject;
         else
             _transform = transform;
-        
+
         position = _coulombLogic.WorldToCalcSpace(_transform);
         _lastPosition = observeLocal ? _transform.localPosition : _transform.position;
     }
@@ -38,4 +39,5 @@ public class CoulombAssessmentPosition : MonoBehaviour
             position = _coulombLogic.WorldToCalcSpace(_transform);
         }
     }
+
 }

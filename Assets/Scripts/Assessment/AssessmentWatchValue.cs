@@ -38,7 +38,7 @@ namespace Maroon.Assessment
             set => isDynamic = value;
         }
 
-        private void Start()
+        private void Awake()
         {
             _attributeComponents = new List<string>(attribute.Split('.'));
         }

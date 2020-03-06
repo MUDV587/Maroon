@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Maroon.Physics;
 using UnityEngine;
 
 namespace Maroon.Assessment
@@ -50,6 +51,14 @@ namespace Maroon.Assessment
                 return;
 
             AssessmentManager.Instance?.SendDataUpdate(ObjectID, propertyName, watchValue.GetValue());
+        }
+
+        public void OnAttributeValueChanged2(object value, string propertyName, bool isDynamic)
+        {
+            if (isDynamic)
+                return;
+            
+            AssessmentManager.Instance?.SendDataUpdate(ObjectID, propertyName, value);
         }
     }
 }
