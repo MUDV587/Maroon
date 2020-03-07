@@ -6,18 +6,28 @@ using UnityEngine;
 
 public class SortingLogic : MonoBehaviour
 {
+    public enum SortingAlgorithmType
+    {
+        SA_None,
+        SA_RadixSort,
+        SA_BubbleSort
+    }
+    
     [Header("Sorting Machine Settings")] 
     public SortingMachine sortingMachine;
+
+    public SortingAlgorithmType sortingAlgorithm;
+    private SortingAlgorithm _algorithm;
 
     
     [Header("Array Settings")] 
     public ArrayPlace referencePlace;
     [Range(0,10)]
     public int arraySize = 10;
-    public float _arrayArrangeSpeed = 0.3f;
 
-    public int moveFrom = 0;
-    public int moveTo = 0;
+    [Header("Debugging Variables")]
+    [Range(0, 9)] public int moveFrom = 0;
+    [Range(0, 9)] public int moveTo = 0;
     public bool move = false;
     
     private List<ArrayPlace> _arrayPlaces = new List<ArrayPlace>();
@@ -45,7 +55,7 @@ public class SortingLogic : MonoBehaviour
             CreateArray(arraySize);
 
         if (move) {
-            MoveElement(moveFrom, moveTo);
+            Insert(moveFrom, moveTo);
         }
     }
 
@@ -64,7 +74,7 @@ public class SortingLogic : MonoBehaviour
             
             //Set Position
             _arrayPlaces[i].gameObject.transform.localPosition = currentPos;
-            _arrayPlaces[i].Index = i + 1;
+            _arrayPlaces[i].Index = i;
             currentPos.z -= referencePlace.width;
         }
 
@@ -75,7 +85,7 @@ public class SortingLogic : MonoBehaviour
             newPlace.SetActive(true);
             newPlace.transform.localPosition = currentPos;
             var place = newPlace.GetComponent<ArrayPlace>();
-            place.Index = _arrayPlaces.Count + 1;
+            place.Index = _arrayPlaces.Count;
             currentPos.z -= referencePlace.width;
             
             _arrayPlaces.Add(place);
@@ -84,30 +94,39 @@ public class SortingLogic : MonoBehaviour
         currentSize = arraySize;
     }
 
-    public void MoveElement(int fromIdx, int toIdx)
+    public void Insert(int fromIdx, int toIdx)
     {
-        sortingMachine.MoveElement(fromIdx, toIdx);
+        if (fromIdx < 0 || fromIdx >= _arrayPlaces.Count || !_arrayPlaces[fromIdx].isActiveAndEnabled ||
+            toIdx < 0 || toIdx >= _arrayPlaces.Count || !_arrayPlaces[toIdx].isActiveAndEnabled)
+            return;
+        
+        sortingMachine.Insert(fromIdx, toIdx);
         move = false;
     }
+    
+    public void MoveFinished()
+    {
+        //TODO Jannik: This function gets called once the sorting machine finished insert, swap, to Bucket resp. compare
+    }
 
-    public void RearrangeArrayElements()
+    public void RearrangeArrayElements(float speed)
     {
         for (var i = 0; i < ArrayPlaces.Count - 1; ++i)
         {
             if (ArrayPlaces[i].sortElement != null) continue;
             
-            ArrayPlaces[i].SetSortElement(_arrayPlaces[i+1].sortElement, _arrayArrangeSpeed);
+            ArrayPlaces[i].SetSortElement(_arrayPlaces[i+1].sortElement, speed);
             _arrayPlaces[i + 1].sortElement = null;
         }
     }
 
-    public void MakePlaceInArray(int index)
+    public void MakePlaceInArray(int index, float speed)
     {
         for (var i = ArrayPlaces.Count - 1; i > index; --i)
         {
             if(ArrayPlaces[i].sortElement != null) continue;
             
-            ArrayPlaces[i].SetSortElement(_arrayPlaces[i-1].sortElement, _arrayArrangeSpeed);
+            ArrayPlaces[i].SetSortElement(_arrayPlaces[i-1].sortElement, speed);
             ArrayPlaces[i - 1].sortElement = null;
         }
     }

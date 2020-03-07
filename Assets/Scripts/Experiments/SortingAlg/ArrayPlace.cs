@@ -77,7 +77,12 @@ public class ArrayPlace : MonoBehaviour
         this.sortElement = sortElement;
         this.sortElement.transform.parent = transform;
 
-        _distancePerSecond = speed;
+        var sortPos = sortElement.transform.localPosition;
+        var refPos = elementPlace.localPosition;
+
+        var max = Mathf.Max(Mathf.Abs(sortPos.x - refPos.x), Mathf.Abs(sortPos.z - refPos.z));
+        
+        _distancePerSecond = max / speed;
         _moveSortElement = true;
     }
 }

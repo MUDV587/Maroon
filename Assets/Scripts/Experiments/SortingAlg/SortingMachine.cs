@@ -8,20 +8,18 @@ public class SortingMachine : MonoBehaviour
         SMS_Pause,
         SMS_ToSource,
         SMS_SourceDown,
-        SMS_GrabSource,
         SMS_SourceUp,
         SMS_ToDestination,
         SMS_DestinationDown,
-        SMS_PlaceDestination,
-        SMS_Up
+        SMS_DestinationUp
     }
     
     public SortingMachineState sortingState = SortingMachineState.SMS_Pause;
     public SortingLogic sortingLogic;
     
     [Header("Speed Settings")]
-    public float distancePerSecond = 0.5f;
-    public float distancePerSecondVertical = 0.5f;
+    [Range(1f, 10f)]
+    public float timePerMove = 3f;
 
     [Header("Highlight Settings")] 
     public GameObject highlighter;
@@ -43,12 +41,7 @@ public class SortingMachine : MonoBehaviour
     private int _sourceIdx;
     private int _destinationIdx;
     private GameObject _movingElement;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    private float _currentDistancePerSecond;
 
     // Update is called once per frame
     void Update()
@@ -59,70 +52,92 @@ public class SortingMachine : MonoBehaviour
                 break;
             case SortingMachineState.SMS_ToSource:
             {
-                if(moveHorizontal(sortingLogic.ArrayPlaces[_sourceIdx].transform.position.z))
+                if (moveHorizontal(sortingLogic.ArrayPlaces[_sourceIdx].transform.position.z, _currentDistancePerSecond))
+                {
                     sortingState = SortingMachineState.SMS_SourceDown;
+                    
+                    var wholeDistance = Mathf.Abs(sortingLogic.ArrayPlaces[_sourceIdx].sortElement.transform.position.y - grapperPointer.transform.TransformPoint(Vector3.zero).y);
+                    _currentDistancePerSecond = wholeDistance / (timePerMove * 0.15f);
+                }
             } break;
             case SortingMachineState.SMS_SourceDown:
             {
-                if (GoDown(sortingLogic.ArrayPlaces[_sourceIdx].sortElement.transform.position.y))
-                    sortingState = SortingMachineState.SMS_GrabSource;
-            } break;
-            case SortingMachineState.SMS_GrabSource:
-                highlighter.SetActive(true);
-                _movingElement = sortingLogic.ArrayPlaces[_sourceIdx].sortElement;
-                sortingLogic.ArrayPlaces[_sourceIdx].sortElement = null;
-                _movingElement.transform.parent = smallGrapper.transform;
+                if (GoDown(sortingLogic.ArrayPlaces[_sourceIdx].sortElement.transform.position.y,
+                    _currentDistancePerSecond))
+                {
+                    //Grab Source
+                    highlighter.SetActive(true);
+                    _movingElement = sortingLogic.ArrayPlaces[_sourceIdx].sortElement;
+                    sortingLogic.ArrayPlaces[_sourceIdx].sortElement = null;
+                    _movingElement.transform.parent = smallGrapper.transform;
 
-                sortingLogic.RearrangeArrayElements();
-                sortingState = SortingMachineState.SMS_SourceUp;
-                break;
+                    sortingLogic.RearrangeArrayElements(timePerMove * 0.15f);
+                    sortingState = SortingMachineState.SMS_SourceUp;
+                }
+            } break;
             case SortingMachineState.SMS_SourceUp:
-                if (GoUp())
+                if (GoUp(_currentDistancePerSecond))
+                {
                     sortingState = SortingMachineState.SMS_ToDestination;
-                break;
+                    
+                    var wholeDistance = Mathf.Abs(sortingLogic.ArrayPlaces[_destinationIdx].transform.position.z- grapperPointer.transform.position.z);
+                    _currentDistancePerSecond = wholeDistance / (timePerMove * 0.3f);
+                } break;
             case SortingMachineState.SMS_ToDestination:
-                if (moveHorizontal(sortingLogic.ArrayPlaces[_destinationIdx].transform.position.z))
+                if (moveHorizontal(sortingLogic.ArrayPlaces[_destinationIdx].transform.position.z, _currentDistancePerSecond))
                 {
                     sortingState = SortingMachineState.SMS_DestinationDown;
-                    sortingLogic.MakePlaceInArray(_destinationIdx);
+                    sortingLogic.MakePlaceInArray(_destinationIdx, timePerMove * 0.15f);
+                    
+                    var wholeDistance = Mathf.Abs(sortingLogic.ArrayPlaces[_destinationIdx].elementPlace.transform.position.y 
+                                                  + _movingElement.GetComponent<SortingElement>().size / 2f 
+                                                  - grapperPointer.transform.TransformPoint(Vector3.zero).y);
+                    _currentDistancePerSecond = wholeDistance / (timePerMove * 0.15f);
                 }
                 break;
             case SortingMachineState.SMS_DestinationDown:
-                if (GoDown(sortingLogic.ArrayPlaces[_destinationIdx].elementPlace.transform.position.y + 0.1f)) //TODO: SortingElement with WIDTH
-                    sortingState = SortingMachineState.SMS_PlaceDestination;
+                if (GoDown(sortingLogic.ArrayPlaces[_destinationIdx].elementPlace.transform.position.y
+                           + _movingElement.GetComponent<SortingElement>().size / 2f, _currentDistancePerSecond))
+                {
+                    //Place Element At Destination
+                    highlighter.SetActive(false);
+                    sortingLogic.ArrayPlaces[_destinationIdx].SetSortElement(_movingElement, 1f);
+                    _movingElement = null;
+                    sortingState = SortingMachineState.SMS_DestinationUp;
+                }
                 break;
-            case SortingMachineState.SMS_PlaceDestination:
-                highlighter.SetActive(false);
-                sortingLogic.ArrayPlaces[_destinationIdx].SetSortElement(_movingElement, 1f);
-                _movingElement = null;
-                sortingState = SortingMachineState.SMS_Up;
-                break;
-            case SortingMachineState.SMS_Up:
-                if (GoUp())
+            case SortingMachineState.SMS_DestinationUp:
+                if (GoUp(_currentDistancePerSecond))
+                {
                     sortingState = SortingMachineState.SMS_Pause;
+                    sortingLogic.MoveFinished();
+                }
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
 
-    public bool MoveElement(int fromIdx, int toIdx)
+    public bool Insert(int fromIdx, int toIdx)
     {
         if (sortingState != SortingMachineState.SMS_Pause) return false;
 
         _sourceIdx = fromIdx;
         _destinationIdx = toIdx;
         sortingState = SortingMachineState.SMS_ToSource;
+        
+        var wholeDistance = Mathf.Abs(sortingLogic.ArrayPlaces[_sourceIdx].sortElement.transform.position.z- grapperPointer.transform.position.z);
+        _currentDistancePerSecond = wholeDistance / (timePerMove * 0.3f);
         return true;
     }
 
-    private bool GoDown(float sourceY) //returns if the sourceY was reached
+    private bool GoDown(float sourceY, float distancePerSecond) //returns if the sourceY was reached
     {
         var distance = Mathf.Abs(sourceY - grapperPointer.transform.position.y);
         var retValue = false;
 
-        if (distance > distancePerSecondVertical * Time.deltaTime)
-            distance = distancePerSecondVertical * Time.deltaTime;
+        if (distance > distancePerSecond * Time.deltaTime)
+            distance = distancePerSecond * Time.deltaTime;
         else
         {
             //next thing will be grapping the source
@@ -162,10 +177,10 @@ public class SortingMachine : MonoBehaviour
         return retValue;
     }
 
-    private bool GoUp()
+    private bool GoUp(float distancePerSecond)
     {
         var madeDistance = 0f;
-        var allowedDistance = distancePerSecondVertical * Time.deltaTime;
+        var allowedDistance = distancePerSecond * Time.deltaTime;
         var retvalue = true;
         
         //small grapper
@@ -229,7 +244,7 @@ public class SortingMachine : MonoBehaviour
         return true;
     }
 
-    private bool moveHorizontal(float sourceZ)
+    private bool moveHorizontal(float sourceZ, float distancePerSecond)
     {
         var newPos = transform.position;
         var retValue = false;
