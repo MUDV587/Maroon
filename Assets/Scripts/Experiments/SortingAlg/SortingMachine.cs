@@ -6,12 +6,17 @@ public class SortingMachine : MonoBehaviour
     public enum SortingMachineState
     {
         SMS_Pause,
+        //Insert Operation
         SMS_ToSource,
         SMS_SourceDown,
         SMS_SourceUp,
         SMS_ToDestination,
         SMS_DestinationDown,
-        SMS_DestinationUp
+        SMS_DestinationUp,
+        //Swap Operation
+        SMS_ElementDisappear,
+        SMS_ElementAppear,
+        SMS_ElementFinish
     }
     
     public SortingMachineState sortingState = SortingMachineState.SMS_Pause;
@@ -36,8 +41,8 @@ public class SortingMachine : MonoBehaviour
     public float smallGrapperEnd = -0.45f;
     public GameObject grapperPointer;
 
-    
-    
+
+    private float _waitTime = -1f;
     private int _sourceIdx;
     private int _destinationIdx;
     private GameObject _movingElement;
@@ -46,6 +51,11 @@ public class SortingMachine : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (_waitTime > 0f) {
+            _waitTime -= Time.deltaTime;
+            return;
+        }
+        
         switch (sortingState)
         {
             case SortingMachineState.SMS_Pause: //to nothing as we pause
@@ -111,7 +121,32 @@ public class SortingMachine : MonoBehaviour
                 {
                     sortingState = SortingMachineState.SMS_Pause;
                     sortingLogic.MoveFinished();
-                }
+                } break;
+            case SortingMachineState.SMS_ElementDisappear:
+            {
+                _waitTime = timePerMove / 2f;
+                sortingLogic.ArrayPlaces[_sourceIdx].Highlight(true);
+                sortingLogic.ArrayPlaces[_destinationIdx].Highlight(true);
+                sortingLogic.ArrayPlaces[_sourceIdx].StartDisappear(_waitTime);
+                sortingLogic.ArrayPlaces[_destinationIdx].StartDisappear(_waitTime);
+                sortingState = SortingMachineState.SMS_ElementAppear;
+            } break;
+            case SortingMachineState.SMS_ElementAppear:
+            {
+                var tmp = sortingLogic.ArrayPlaces[_sourceIdx].sortElement;
+                sortingLogic.ArrayPlaces[_sourceIdx].SetSortElement(sortingLogic.ArrayPlaces[_destinationIdx].sortElement, -1f);
+                sortingLogic.ArrayPlaces[_destinationIdx].SetSortElement(tmp, -1f);
+                
+                _waitTime = timePerMove / 2f;
+                sortingLogic.ArrayPlaces[_sourceIdx].StartAppear(_waitTime);
+                sortingLogic.ArrayPlaces[_destinationIdx].StartAppear(_waitTime);
+                sortingState = SortingMachineState.SMS_ElementFinish;
+            } break;
+            case SortingMachineState.SMS_ElementFinish:
+                sortingLogic.ArrayPlaces[_sourceIdx].Highlight(false);
+                sortingLogic.ArrayPlaces[_destinationIdx].Highlight(false);
+                sortingLogic.MoveFinished();
+                sortingState = SortingMachineState.SMS_Pause;
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
@@ -128,6 +163,16 @@ public class SortingMachine : MonoBehaviour
         
         var wholeDistance = Mathf.Abs(sortingLogic.ArrayPlaces[_sourceIdx].sortElement.transform.position.z- grapperPointer.transform.position.z);
         _currentDistancePerSecond = wholeDistance / (timePerMove * 0.3f);
+        return true;
+    }
+
+    public bool Swap(int element1, int element2)
+    {
+        if (sortingState != SortingMachineState.SMS_Pause) return false;
+
+        _sourceIdx = element1;
+        _destinationIdx = element2;
+        sortingState = SortingMachineState.SMS_ElementDisappear;
         return true;
     }
 

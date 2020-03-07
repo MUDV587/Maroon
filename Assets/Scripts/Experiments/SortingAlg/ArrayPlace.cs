@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using DissolveShader;
+using TMPro;
 using UnityEngine;
 
 public class ArrayPlace : MonoBehaviour
@@ -28,6 +29,7 @@ public class ArrayPlace : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        highlighter.SetActive(false);
         UpdateIndex();
     }
 
@@ -80,9 +82,37 @@ public class ArrayPlace : MonoBehaviour
         var sortPos = sortElement.transform.localPosition;
         var refPos = elementPlace.localPosition;
 
-        var max = Mathf.Max(Mathf.Abs(sortPos.x - refPos.x), Mathf.Abs(sortPos.z - refPos.z));
-        
-        _distancePerSecond = max / speed;
-        _moveSortElement = true;
+        if (speed < 0f)
+        {
+            refPos.y = sortPos.y;
+            sortElement.transform.localPosition = refPos;
+        }
+        else {
+            var max = Mathf.Max(Mathf.Abs(sortPos.x - refPos.x), Mathf.Abs(sortPos.z - refPos.z));
+
+            _distancePerSecond = max / speed;
+            _moveSortElement = true;
+        }
+    }
+
+    public void StartDisappear(float timeToDisappear)
+    {
+        if (!sortElement) return;
+        var dissolve = sortElement.GetComponent<DissolveHandler>();
+        if (!dissolve) return;
+        dissolve.StartDissolving(timeToDisappear, false);
+    }
+
+    public void StartAppear(float timeToAppear)
+    {
+        if (!sortElement) return;
+        var dissolve = sortElement.GetComponent<DissolveHandler>();
+        if (!dissolve) return;
+        dissolve.StartDissolving(timeToAppear, true);
+    }
+
+    public void Highlight(bool active = true)
+    {
+        highlighter.SetActive(active);
     }
 }

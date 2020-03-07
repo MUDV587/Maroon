@@ -29,6 +29,7 @@ public class SortingLogic : MonoBehaviour
     [Range(0, 9)] public int moveFrom = 0;
     [Range(0, 9)] public int moveTo = 0;
     public bool move = false;
+    public bool swap = false;
     
     private List<ArrayPlace> _arrayPlaces = new List<ArrayPlace>();
 
@@ -56,6 +57,10 @@ public class SortingLogic : MonoBehaviour
 
         if (move) {
             Insert(moveFrom, moveTo);
+        }
+
+        if (swap) {
+            Swap(moveFrom, moveTo);
         }
     }
 
@@ -101,7 +106,17 @@ public class SortingLogic : MonoBehaviour
             return;
         
         sortingMachine.Insert(fromIdx, toIdx);
-        move = false;
+        // move = false;
+    }
+
+    public void Swap(int idx1, int idx2)
+    {
+        if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
+            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+            return;
+
+        sortingMachine.Swap(idx1, idx2);
+        swap = false;
     }
     
     public void MoveFinished()
