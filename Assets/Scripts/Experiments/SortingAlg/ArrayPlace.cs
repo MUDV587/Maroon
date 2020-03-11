@@ -95,6 +95,11 @@ public class ArrayPlace : MonoBehaviour
         }
     }
 
+    public int GetSortElementValue()
+    {
+        return sortElement.GetComponent<SortingElement>().number;
+    }
+
     public void StartDisappear(float timeToDisappear)
     {
         if (!sortElement) return;

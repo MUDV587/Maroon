@@ -4072,11 +4072,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sortingMachine: {fileID: 5528102416250526066}
   sortingAlgorithm: 0
+  displayText: {fileID: 383387597}
   referencePlace: {fileID: 712102329}
   arraySize: 10
   moveFrom: 0
   moveTo: 9
-  move: 1
+  move: 0
   swap: 0
 --- !u!1 &1840586971
 GameObject:
@@ -4886,7 +4887,7 @@ PrefabInstance:
     - target: {fileID: 8682629649530855471, guid: d63de2a9f5d25f645baaa3241fde6f00,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.21700001
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8682629649530855471, guid: d63de2a9f5d25f645baaa3241fde6f00,
         type: 3}
@@ -4931,12 +4932,12 @@ PrefabInstance:
     - target: {fileID: 8682629649530855471, guid: d63de2a9f5d25f645baaa3241fde6f00,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 11.5060005
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8682629649530855471, guid: d63de2a9f5d25f645baaa3241fde6f00,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -3.091
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8682629649530855471, guid: d63de2a9f5d25f645baaa3241fde6f00,
         type: 3}
@@ -5426,8 +5427,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sortingState: 0
   sortingLogic: {fileID: 1839677082}
-  timePerMove: 5
+  timePerMove: 1
   highlighter: {fileID: 2086255123}
+  displayText: {fileID: 910040724}
   bigGrapper: {fileID: 1268594798}
   bigGrapperStart: 0
   bigGrapperEnd: -0.2

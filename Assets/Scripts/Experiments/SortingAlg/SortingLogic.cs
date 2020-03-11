@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class SortingLogic : MonoBehaviour
@@ -18,7 +19,11 @@ public class SortingLogic : MonoBehaviour
 
     public SortingAlgorithmType sortingAlgorithm;
     private SortingAlgorithm _algorithm;
+    private bool _currentlySorting;
+    private bool _waitForMachine;
 
+    [Header("Display")] 
+    public TextMeshPro displayText;
     
     [Header("Array Settings")] 
     public ArrayPlace referencePlace;
@@ -47,6 +52,11 @@ public class SortingLogic : MonoBehaviour
         if (referencePlace != null)
             _arrayPlaces.Add(referencePlace);
         CreateArray(arraySize);
+        
+        //TODO: Set this in a function, make it changable
+        _algorithm = new InsertionSort(this, arraySize);
+        _currentlySorting = true;
+        setPseudocode(-1);
     }
 
     // Update is called once per frame
@@ -55,6 +65,25 @@ public class SortingLogic : MonoBehaviour
         if(currentSize != arraySize)
             CreateArray(arraySize);
 
+        if (!_waitForMachine && _currentlySorting)
+        {
+            _waitForMachine = true;
+            _algorithm.ExecuteNextState();
+        }
+
+        /*
+        //TODO: Just for debugging, should be done by controller
+        if (!_waitForMachine && Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            _waitForMachine = true;
+            _algorithm.ExecuteNextState();
+        }
+        if (!_waitForMachine && Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            _waitForMachine = true;
+            _algorithm.ExecutePreviousState();
+        }*/
+        
         if (move) {
             Insert(moveFrom, moveTo);
         }
@@ -106,7 +135,7 @@ public class SortingLogic : MonoBehaviour
             return;
         
         sortingMachine.Insert(fromIdx, toIdx);
-        // move = false;
+        move = false;
     }
 
     public void Swap(int idx1, int idx2)
@@ -119,9 +148,24 @@ public class SortingLogic : MonoBehaviour
         swap = false;
     }
     
+    public bool CompareGreater(int idx1, int idx2)
+    {
+        if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
+            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+            return false;
+
+        sortingMachine.Compare(idx1, idx2);
+        return _arrayPlaces[idx1].GetSortElementValue() > _arrayPlaces[idx2].GetSortElementValue();
+    }
+    
     public void MoveFinished()
     {
-        //TODO Jannik: This function gets called once the sorting machine finished insert, swap, to Bucket resp. compare
+        _waitForMachine = false;
+    }
+
+    public void sortingFinished()
+    {
+        _currentlySorting = false;
     }
 
     public void RearrangeArrayElements(float speed)
@@ -144,5 +188,28 @@ public class SortingLogic : MonoBehaviour
             ArrayPlaces[i].SetSortElement(_arrayPlaces[i-1].sortElement, speed);
             ArrayPlaces[i - 1].sortElement = null;
         }
+    }
+    
+    public void setSwapsOperations(int swaps, int operations)
+    {
+        sortingMachine.setSwapsOperations(swaps, operations);
+    }
+
+    public void setPseudocode(int highlightLine)
+    {
+        //TODO: Maybe we can find a nicer highlight?
+        string highlightedCode = "";
+        for (int i = 0; i < _algorithm.pseudocode.Count; ++i)
+        {
+            if (i == highlightLine)
+            {
+                highlightedCode += "<mark=#a8eb0055>" + _algorithm.pseudocode[i] + "\n" + "</mark>";
+            }
+            else
+            {
+                highlightedCode += _algorithm.pseudocode[i] + "\n";
+            }
+        }
+        displayText.text = highlightedCode;
     }
 }

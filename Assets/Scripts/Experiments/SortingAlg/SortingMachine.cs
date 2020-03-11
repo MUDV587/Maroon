@@ -1,4 +1,6 @@
 ﻿using System;
+using Antares.Evaluation.LearningContent;
+using TMPro;
 using UnityEngine;
 
 public class SortingMachine : MonoBehaviour
@@ -30,6 +32,7 @@ public class SortingMachine : MonoBehaviour
     public GameObject highlighter;
     
     [Header("Grapper Settings")] 
+    public TextMeshPro displayText;
     public GameObject bigGrapper;
     public float bigGrapperStart = 0;
     public float bigGrapperEnd = -0.2f;
@@ -176,6 +179,13 @@ public class SortingMachine : MonoBehaviour
         return true;
     }
 
+    public bool Compare(int element1, int element2)
+    {
+        //TODO: Animation with highlight and finish (so it takes same time as other operations)
+        sortingLogic.MoveFinished();
+        return true;
+    }
+
     private bool GoDown(float sourceY, float distancePerSecond) //returns if the sourceY was reached
     {
         var distance = Mathf.Abs(sourceY - grapperPointer.transform.position.y);
@@ -315,5 +325,13 @@ public class SortingMachine : MonoBehaviour
         transform.position = newPos;
         return retValue;
     }
-    
+
+    public void setSwapsOperations(int swaps, int operations)
+    {
+        displayText.text = "<style=\"header\">Count:</style>\nOperations:\n<align=\"right\">"
+                           + operations
+                           + "</align>\nSwaps:\n<align=\"right\">"
+                           + swaps
+                           + "</align>";
+    }
 }

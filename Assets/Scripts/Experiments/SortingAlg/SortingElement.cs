@@ -1,6 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(MeshRenderer))]
 public class SortingElement : MonoBehaviour
@@ -22,6 +23,11 @@ public class SortingElement : MonoBehaviour
 
     private void Start()
     {
+        //TODO: Maybe we want to change the visualisation
+        number = Random.Range(1, 100);
+        size = 0.1f + (float)number / 500;
+        color.r = (float) number / 100;
+        
         _meshRenderer = GetComponent<MeshRenderer>();
         AdaptAppearance();
     }
