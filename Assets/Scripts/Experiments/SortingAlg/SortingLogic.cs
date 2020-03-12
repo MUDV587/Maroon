@@ -65,13 +65,13 @@ public class SortingLogic : MonoBehaviour
         if(currentSize != arraySize)
             CreateArray(arraySize);
 
-        if (!_waitForMachine && _currentlySorting)
+        /*if (!_waitForMachine && _currentlySorting)
         {
             _waitForMachine = true;
             _algorithm.ExecuteNextState();
-        }
+        }*/
 
-        /*
+        
         //TODO: Just for debugging, should be done by controller
         if (!_waitForMachine && Input.GetKeyDown(KeyCode.RightArrow))
         {
@@ -82,7 +82,7 @@ public class SortingLogic : MonoBehaviour
         {
             _waitForMachine = true;
             _algorithm.ExecutePreviousState();
-        }*/
+        }
         
         if (move) {
             Insert(moveFrom, moveTo);
@@ -132,7 +132,10 @@ public class SortingLogic : MonoBehaviour
     {
         if (fromIdx < 0 || fromIdx >= _arrayPlaces.Count || !_arrayPlaces[fromIdx].isActiveAndEnabled ||
             toIdx < 0 || toIdx >= _arrayPlaces.Count || !_arrayPlaces[toIdx].isActiveAndEnabled)
+        {
+            _waitForMachine = false;
             return;
+        }
         
         sortingMachine.Insert(fromIdx, toIdx);
         move = false;
@@ -142,7 +145,10 @@ public class SortingLogic : MonoBehaviour
     {
         if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
             idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+        {
+            _waitForMachine = false;
             return;
+        }
 
         sortingMachine.Swap(idx1, idx2);
         swap = false;
@@ -152,7 +158,10 @@ public class SortingLogic : MonoBehaviour
     {
         if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
             idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+        {
+            _waitForMachine = false;
             return false;
+        }
 
         sortingMachine.Compare(idx1, idx2);
         return _arrayPlaces[idx1].GetSortElementValue() > _arrayPlaces[idx2].GetSortElementValue();
