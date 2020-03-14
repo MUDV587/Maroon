@@ -54,7 +54,7 @@ public class SortingLogic : MonoBehaviour
         CreateArray(arraySize);
         
         //TODO: Set this in a function, make it changable
-        _algorithm = new InsertionSort(this, arraySize);
+        _algorithm = new MergeSort(this, arraySize);
         _currentlySorting = true;
         setPseudocode(-1);
     }

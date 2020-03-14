@@ -230,10 +230,16 @@ public class MergeSort : SortingAlgorithm
     private int _r;
     private int _n;
     
+    //Stacks for subroutine calling
     private Stack<int> _continueI = new Stack<int>();
     private Stack<int> _continueJ = new Stack<int>();
     private Stack<int> _continueK = new Stack<int>();
     private Stack<SortingState> _continueLine = new Stack<SortingState>();
+    
+    //Stacks for reversing
+    private Stack<int> _oldK = new Stack<int>();
+    private Stack<int> _oldR = new Stack<int>();
+    private Stack<int> _oldL = new Stack<int>();
     
     public MergeSort(SortingLogic logic, int n) : base(logic)
     {
@@ -286,6 +292,7 @@ public class MergeSort : SortingAlgorithm
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line3: // k = (i + j) // 2
+                _oldK.Push(_k);
                 _k = (_i + _j) / 2;
                 _nextState = SortingState.SS_Line4;
                 sortingLogic.MoveFinished();
@@ -313,11 +320,13 @@ public class MergeSort : SortingAlgorithm
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line9: // r = k
+                _oldR.Push(_r);
                 _r = _k;
                 _nextState = SortingState.SS_Line10;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line10: // l = i
+                _oldL.Push(_l);
                 _l = _i;
                 _nextState = SortingState.SS_Line11;
                 sortingLogic.MoveFinished();
@@ -356,6 +365,71 @@ public class MergeSort : SortingAlgorithm
             case SortingState.SS_Line15: // l += 1
                 _l++;
                 _nextState = SortingState.SS_Line11;
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_None:
+                sortingLogic.sortingFinished();
+                sortingLogic.MoveFinished();
+                break;
+        }
+    }
+    
+    protected override void handleReverseState(SortingState currentState)
+    {
+        switch (currentState)
+        {
+            case SortingState.SS_Line1: // mergeSort(A, i, j):
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line2: // if i<j-1:
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line3: // k = (i + j) // 2
+                _k = _oldK.Pop();
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line4: // mergeSort(A,i,k)
+                leaveSubroutine();
+                _nextState = currentState;
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line5: // mergeSort(A,k,j)
+                leaveSubroutine();
+                _nextState = currentState;
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line6: // merge(A,i,k,j)
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line7: // 
+                break;
+            case SortingState.SS_Line8: // merge(A, i, k, j):
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line9: // r = k
+                _r = _oldR.Pop();
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line10: // l = i
+                _l = _oldL.Pop();
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line11: // while l < r and r < j:
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line12: // if A[r] < A[l]:
+                sortingLogic.CompareGreater(_l, _r);
+                break;
+            case SortingState.SS_Line13: // insert(A,r,l)
+                _swaps--;
+                sortingLogic.Insert(_l,_r);
+                break;
+            case SortingState.SS_Line14: // r += 1
+                _r--;
+                sortingLogic.MoveFinished();
+                break;
+            case SortingState.SS_Line15: // l += 1
+                _l--;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_None:
