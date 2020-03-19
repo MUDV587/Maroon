@@ -74,6 +74,7 @@ public class MergeSort : SortingAlgorithm
         _j = _continueJ.Pop();
         _k = _continueK.Pop();
         _nextState = _continueLine.Pop();
+        sortingLogic.markCurrentSubset(_i, _j);
     }
     
     protected override void handleState(SortingState currentState)
@@ -105,12 +106,14 @@ public class MergeSort : SortingAlgorithm
                 enterSubroutineWithExitState(SortingState.SS_Line5);
                 _j = _k;
                 _nextState = SortingState.SS_Line1;
+                sortingLogic.markCurrentSubset(_i, _j);
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line5: // mergeSort(A,k,j)
                 enterSubroutineWithExitState(SortingState.SS_Line6);
                 _i = _k;
                 _nextState = SortingState.SS_Line1;
+                sortingLogic.markCurrentSubset(_i, _j);
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line6: // merge(A,i,k,j)

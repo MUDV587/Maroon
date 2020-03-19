@@ -26,7 +26,7 @@ public class SortingElement : MonoBehaviour
         //TODO: Maybe we want to change the visualisation
         number = Random.Range(1, 100);
         size = 0.1f + (float)number / 500;
-        color.r = (float) number / 100;
+        resetToDefaultColor();
         
         _meshRenderer = GetComponent<MeshRenderer>();
         AdaptAppearance();
@@ -56,5 +56,17 @@ public class SortingElement : MonoBehaviour
         _lastColor = color;
         _lastNumber = number;
         _lastSize = size;
+    }
+
+    public void resetToDefaultColor()
+    {
+        color.b = 0.0f;
+        color.r = (float) number * 8.0f / 1000.0f + 0.2f;
+    }
+
+    public void markActiveColor()
+    {
+        color.b = (float) number * 8.0f / 1000.0f + 0.2f;
+        color.r = 0.0f;
     }
 }

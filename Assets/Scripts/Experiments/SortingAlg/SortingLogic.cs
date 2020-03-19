@@ -65,11 +65,11 @@ public class SortingLogic : MonoBehaviour
         if(currentSize != arraySize)
             CreateArray(arraySize);
 
-        /*if (!_waitForMachine && _currentlySorting)
+        if (!_waitForMachine && _currentlySorting)
         {
             _waitForMachine = true;
             _algorithm.ExecuteNextState();
-        }*/
+        }
 
         
         //TODO: Just for debugging, should be done by controller
@@ -220,5 +220,20 @@ public class SortingLogic : MonoBehaviour
             }
         }
         displayText.text = highlightedCode;
+    }
+
+    public void markCurrentSubset(int from, int to) // exclude to
+    {
+        for (int i = 0; i < ArrayPlaces.Count; ++i)
+        {
+            if (i >= from && i < to)
+            {
+                ArrayPlaces[i].sortElement.GetComponent<SortingElement>().markActiveColor();
+            }
+            else
+            {
+                ArrayPlaces[i].sortElement.GetComponent<SortingElement>().resetToDefaultColor();
+            }
+        }
     }
 }
