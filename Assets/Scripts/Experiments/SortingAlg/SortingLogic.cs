@@ -54,7 +54,7 @@ public class SortingLogic : MonoBehaviour
         CreateArray(arraySize);
         
         //TODO: Set this in a function, make it changable
-        _algorithm = new MergeSort(this, arraySize);
+        _algorithm = new QuickSort(this, arraySize);
         _currentlySorting = true;
         setPseudocode(-1);
     }
@@ -144,7 +144,8 @@ public class SortingLogic : MonoBehaviour
     public void Swap(int idx1, int idx2)
     {
         if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
-            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled ||
+            idx1 == idx2)
         {
             _waitForMachine = false;
             return;
@@ -157,7 +158,8 @@ public class SortingLogic : MonoBehaviour
     public bool CompareGreater(int idx1, int idx2)
     {
         if (idx1 < 0 || idx1 >= _arrayPlaces.Count || !_arrayPlaces[idx1].isActiveAndEnabled ||
-            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled)
+            idx2 < 0 || idx2 >= _arrayPlaces.Count || !_arrayPlaces[idx2].isActiveAndEnabled ||
+            idx1 == idx2)
         {
             _waitForMachine = false;
             return false;

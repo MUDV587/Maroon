@@ -32,7 +32,6 @@ public class MergeSort : SortingAlgorithm
     private int _k;
     private int _l;
     private int _r;
-    private int _n;
     
     //Stacks for subroutine calling
     private Stack<int> _continueI = new Stack<int>();
@@ -52,7 +51,6 @@ public class MergeSort : SortingAlgorithm
         _k = 0;
         _l = 0;
         _r = 0;
-        _n = n;
     }
 
     private void enterSubroutineWithExitState(SortingState state)
