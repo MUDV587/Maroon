@@ -34,6 +34,7 @@ public class QuickSort : SortingAlgorithm
     private int _pInd;
     
     //Stacks for subroutine calling
+    private int _leftSubroutine;
     private Stack<int> _continueL = new Stack<int>();
     private Stack<int> _continueR = new Stack<int>();
     private Stack<int> _continueK = new Stack<int>();
@@ -50,6 +51,7 @@ public class QuickSort : SortingAlgorithm
         _l = 0;
         _r = n;
         _pInd = 0;
+        _leftSubroutine = 0;
     }
 
     private void enterSubroutineWithExitState(SortingState state)
@@ -67,20 +69,37 @@ public class QuickSort : SortingAlgorithm
             _nextState = SortingState.SS_None;
             return;
         }
-
-        _l = _continueL.Pop();
-        _r = _continueR.Pop();
-        _k = _continueK.Pop();
         _nextState = _continueLine.Pop();
+        _leftSubroutine++;
+        if (_nextState == SortingState.SS_Line6) //Line6 is dummy for leaving
+        {
+            leaveSubroutine();
+        }
+    }
+
+    private void continueValuesAfterSubroutine()
+    {
+        while (_leftSubroutine > 0)
+        {
+            _l = _continueL.Pop();
+            _r = _continueR.Pop();
+            _k = _continueK.Pop();
+            _leftSubroutine--;
+        }
         sortingLogic.markCurrentSubset(_l, _r);
     }
     
     protected override void handleState(SortingState currentState)
     {
+        if (_leftSubroutine > 0)
+        {
+            continueValuesAfterSubroutine();
+        }
         switch (currentState)
         {
             case SortingState.SS_Line1: // quickSort(l,r):
                 _nextState = SortingState.SS_Line2;
+                sortingLogic.markCurrentSubset(_l, _r);
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line2: // if(l<r-1):
@@ -104,7 +123,6 @@ public class QuickSort : SortingAlgorithm
                 _r = _k;
                 _j = _l-1;
                 _nextState = SortingState.SS_Line1;
-                sortingLogic.markCurrentSubset(_l, _r);
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line5: // quickSort(k+1,r)
@@ -112,13 +130,10 @@ public class QuickSort : SortingAlgorithm
                 _l = _k + 1;
                 _j = _l-1;
                 _nextState = SortingState.SS_Line1;
-                sortingLogic.markCurrentSubset(_l, _r);
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line6: // 
                 //dummy for leaving subroutine after finishing Line 5
-                leaveSubroutine();
-                sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line7: // partition(l, r):
                 _nextState = SortingState.SS_Line8;
@@ -194,6 +209,7 @@ public class QuickSort : SortingAlgorithm
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_None:
+                sortingLogic.markCurrentSubset(0,0); //all to default
                 sortingLogic.sortingFinished();
                 sortingLogic.MoveFinished();
                 break;
