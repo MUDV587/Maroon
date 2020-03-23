@@ -54,7 +54,7 @@ public class SortingLogic : MonoBehaviour
         CreateArray(arraySize);
         
         //TODO: Set this in a function, make it changable
-        _algorithm = new QuickSort(this, arraySize);
+        _algorithm = new MergeSort(this, arraySize);
         _currentlySorting = true;
         setPseudocode(-1);
     }
@@ -65,11 +65,11 @@ public class SortingLogic : MonoBehaviour
         if(currentSize != arraySize)
             CreateArray(arraySize);
 
-        if (!_waitForMachine && _currentlySorting)
+        /*if (!_waitForMachine && _currentlySorting)
         {
             _waitForMachine = true;
             _algorithm.ExecuteNextState();
-        }
+        }*/
 
         
         //TODO: Just for debugging, should be done by controller

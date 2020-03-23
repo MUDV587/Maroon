@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using OVR.OpenVR;
 using UnityEngine;
 
 public class MergeSort : SortingAlgorithm
@@ -39,8 +40,12 @@ public class MergeSort : SortingAlgorithm
     private Stack<int> _continueJ = new Stack<int>();
     private Stack<int> _continueK = new Stack<int>();
     private Stack<SortingState> _continueLine = new Stack<SortingState>();
+    private int _tempI;
+    private int _tempJ;
     
     //Stacks for reversing
+    private Stack<int> _oldI = new Stack<int>();
+    private Stack<int> _oldJ = new Stack<int>();
     private Stack<int> _oldK = new Stack<int>();
     private Stack<int> _oldR = new Stack<int>();
     private Stack<int> _oldL = new Stack<int>();
@@ -53,14 +58,22 @@ public class MergeSort : SortingAlgorithm
         _k = 0;
         _l = 0;
         _r = 0;
+        _tempI = _i;
+        _tempJ = _j;
     }
 
     private void enterSubroutineWithExitState(SortingState state)
     {
+        _continueLine.Push(state);
+    }
+
+    public void storeMainroutineValues()
+    {
         _continueI.Push(_i);
         _continueJ.Push(_j);
         _continueK.Push(_k);
-        _continueLine.Push(state);
+        _i = _tempI;
+        _j = _tempJ;
     }
 
     private void leaveSubroutine()
@@ -77,10 +90,20 @@ public class MergeSort : SortingAlgorithm
     private void continueValuesAfterSubroutine()
     {
         _leftSubroutine = false;
+        _oldI.Push(_i);
+        _oldJ.Push(_j);
+        _oldK.Push(_k);
         _i = _continueI.Pop();
         _j = _continueJ.Pop();
         _k = _continueK.Pop();
         sortingLogic.markCurrentSubset(_i, _j);
+    }
+
+    private void reverseValuesIntoSubroutine()
+    {
+        _i = _oldI.Pop();
+        _j = _oldJ.Pop();
+        _k = _oldK.Pop();
     }
     
     protected override void handleState(SortingState currentState)
@@ -93,6 +116,7 @@ public class MergeSort : SortingAlgorithm
         {
             case SortingState.SS_Line1: // mergeSort(A, i, j):
                 _nextState = SortingState.SS_Line2;
+                storeMainroutineValues();
                 sortingLogic.markCurrentSubset(_i, _j);
                 sortingLogic.MoveFinished();
                 break;
@@ -115,13 +139,15 @@ public class MergeSort : SortingAlgorithm
                 break;
             case SortingState.SS_Line4: // mergeSort(A,i,k)
                 enterSubroutineWithExitState(SortingState.SS_Line5);
-                _j = _k;
+                _tempI = _i;
+                _tempJ = _k;
                 _nextState = SortingState.SS_Line1;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line5: // mergeSort(A,k,j)
                 enterSubroutineWithExitState(SortingState.SS_Line6);
-                _i = _k;
+                _tempI = _k;
+                _tempJ = _j;
                 _nextState = SortingState.SS_Line1;
                 sortingLogic.MoveFinished();
                 break;
@@ -196,9 +222,13 @@ public class MergeSort : SortingAlgorithm
         switch (currentState)
         {
             case SortingState.SS_Line1: // mergeSort(A, i, j):
+                _tempI = _i;
+                _tempJ = _j;
+                continueValuesAfterSubroutine();
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line2: // if i<j-1:
+                _leftSubroutine = false;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line3: // k = (i + j) // 2
@@ -206,16 +236,16 @@ public class MergeSort : SortingAlgorithm
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line4: // mergeSort(A,i,k)
-                leaveSubroutine();
-                _nextState = currentState;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line5: // mergeSort(A,k,j)
-                leaveSubroutine();
-                _nextState = currentState;
+                _leftSubroutine = true;
+                reverseValuesIntoSubroutine();
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line6: // merge(A,i,k,j)
+                _leftSubroutine = true;
+                reverseValuesIntoSubroutine();
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line7: // 
@@ -232,6 +262,7 @@ public class MergeSort : SortingAlgorithm
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line11: // while l < r and r < j:
+                _leftSubroutine = false;
                 sortingLogic.MoveFinished();
                 break;
             case SortingState.SS_Line12: // if A[r] < A[l]:
