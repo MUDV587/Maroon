@@ -17,106 +17,114 @@ public class InsertionSort : SortingAlgorithm
         };
     }
     
-    private int _n;
-    private int _j;
-    private int _i;
-    
-    private Stack<int> _oldJ = new Stack<int>();
-
     public InsertionSort(SortingLogic logic, int n) : base(logic)
     {
-        _i = 0;
-        _j = 0;
-        _n = n;
+        _nextState = new InsertionSortingState(this, n);
     }
 
-    protected override void handleState(SortingState currentState)
+    private class InsertionSortingState : SortingState
     {
-        switch (currentState)
+        public InsertionSortingState(InsertionSortingState old) : base(old) {}
+
+        public InsertionSortingState(InsertionSort algorithm, int n): base(algorithm)
         {
-            case SortingState.SS_Line1: // for i = 1 .. len(A)-1:
-                _i++;
-                //Debug.Log("for i = " + _i);
-                if (_i < _n)
-                {
-                    _nextState = SortingState.SS_Line2;
-                }
-                else
-                {
-                    _nextState = SortingState.SS_None;
-                }
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line2: // j = i-1
-                _oldJ.Push(_j); //store j values for reverse steps
-                _j = _i - 1;
-                //Debug.Log("j = " + (_i - 1));
-                _nextState = SortingState.SS_Line3;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line3: // while A[j]>A[j+1] and j>=0:
-                //Debug.Log("Compare " + _j + " and " + (_j+1));
-                if (_j < 0)
-                {
-                    _nextState = SortingState.SS_Line1;
-                    sortingLogic.MoveFinished();
-                    break;
-                }
-                if (sortingLogic.CompareGreater(_j, _j + 1))
-                {
-                    _nextState = SortingState.SS_Line4;
-                }
-                else
-                {
-                    _nextState = SortingState.SS_Line1;
-                }
-                break;
-            case SortingState.SS_Line4: // swap A[j+1] and A[j]
-                _swaps++;
-                //Debug.Log("Swap " + _j + " and " + (_j+1));
-                sortingLogic.Swap(_j+1, _j);
-                _nextState = SortingState.SS_Line5;
-                break;
-            case SortingState.SS_Line5: // j = j-1
-                _j--;
-                //Debug.Log("Decreased j =  " + _j);
-                _nextState = SortingState.SS_Line3;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_None:
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            _variables.Add("n", n);
+            _variables.Add("i", 0);
+            _variables.Add("j", 0);
         }
-    }
 
-    protected override void handleReverseState(SortingState currentState)
-    {
-        switch (currentState)
+        public override SortingState Next()
         {
-            case SortingState.SS_Line1: // for i = 1 .. len(A)-1:
-                _i--;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line2: // j = i-1
-                _j = _oldJ.Pop();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line3: // while A[j]>A[j+1] and j>=0:
-                sortingLogic.CompareGreater(_j, _j + 1);
-                break;
-            case SortingState.SS_Line4: // swap A[j+1] and A[j]
-                _swaps--;
-                sortingLogic.Swap(_j+1, _j);
-                break;
-            case SortingState.SS_Line5: // j = j-1
-                _j++;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_None:
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            InsertionSortingState next = new InsertionSortingState(this);
+            next._line = _nextLine;
+            return next;
+        }
+        
+        public override SortingState Copy()
+        {
+            InsertionSortingState copy = new InsertionSortingState(this);
+            return copy;
+        }
+
+        public override void Execute()
+        {
+            int n = _variables["n"];
+            int i = _variables["i"];
+            int j = _variables["j"];
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // for i = 1 .. len(A)-1:
+                    i++;
+                    
+                    if (i < n)
+                    {
+                        _nextLine = SortingStateLine.SS_Line2;
+                    }
+                    else
+                    {
+                        _nextLine = SortingStateLine.SS_None;
+                    }
+                    break;
+                case SortingStateLine.SS_Line2: // j = i-1
+                    j = i - 1;
+                    
+                    _nextLine = SortingStateLine.SS_Line3;
+                    break;
+                case SortingStateLine.SS_Line3: // while A[j]>A[j+1] and j>=0:
+                    if (j < 0)
+                    {
+                        _nextLine = SortingStateLine.SS_Line1;
+                        break;
+                    }
+                    _requireWait = true;
+                    if (_algorithm.CompareGreater(j, j + 1))
+                    {
+                        _nextLine = SortingStateLine.SS_Line4;
+                    }
+                    else
+                    {
+                        _nextLine = SortingStateLine.SS_Line1;
+                    }
+                    break;
+                case SortingStateLine.SS_Line4: // swap A[j+1] and A[j]
+                    _requireWait = true;
+                    _algorithm.Swap(j+1, j);
+                    _nextLine = SortingStateLine.SS_Line5;
+                    break;
+                case SortingStateLine.SS_Line5: // j = j-1
+                    j--;
+                    _nextLine = SortingStateLine.SS_Line3;
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
+
+            _variables["n"] = n;
+            _variables["i"] = i;
+            _variables["j"] = j;
+        }
+        
+        public override void Undo()
+        {
+            _requireWait = false;
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // for i = 1 .. len(A)-1:
+                    break;
+                case SortingStateLine.SS_Line2: // j = i-1
+                    break;
+                case SortingStateLine.SS_Line3: // while A[j]>A[j+1] and j>=0:
+                    break;
+                case SortingStateLine.SS_Line4: // swap A[j+1] and A[j]
+                    int j = _variables["j"];
+                    _requireWait = true;
+                    _algorithm.UndoSwap(j+1, j);
+                    break;
+                case SortingStateLine.SS_Line5: // j = j-1
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
         }
     }
 }

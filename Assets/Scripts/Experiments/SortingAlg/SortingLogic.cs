@@ -54,7 +54,7 @@ public class SortingLogic : MonoBehaviour
         CreateArray(arraySize);
         
         //TODO: Set this in a function, make it changable
-        _algorithm = new MergeSort(this, arraySize);
+        _algorithm = new QuickSort(this, arraySize);
         _currentlySorting = true;
         setPseudocode(-1);
     }
@@ -177,6 +177,7 @@ public class SortingLogic : MonoBehaviour
     public void sortingFinished()
     {
         _currentlySorting = false;
+        markCurrentSubset(0,0);
     }
 
     public void RearrangeArrayElements(float speed)

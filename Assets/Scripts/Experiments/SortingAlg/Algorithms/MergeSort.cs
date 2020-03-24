@@ -27,263 +27,196 @@ public class MergeSort : SortingAlgorithm
             "        l = l+<style=\"number\">1</style>"
         };
     }
-
-    private int _i;
-    private int _j;
-    private int _k;
-    private int _l;
-    private int _r;
-    
-    //Stacks for subroutine calling
-    private bool _leftSubroutine;
-    private Stack<int> _continueI = new Stack<int>();
-    private Stack<int> _continueJ = new Stack<int>();
-    private Stack<int> _continueK = new Stack<int>();
-    private Stack<SortingState> _continueLine = new Stack<SortingState>();
-    private int _tempI;
-    private int _tempJ;
-    
-    //Stacks for reversing
-    private Stack<int> _oldI = new Stack<int>();
-    private Stack<int> _oldJ = new Stack<int>();
-    private Stack<int> _oldK = new Stack<int>();
-    private Stack<int> _oldR = new Stack<int>();
-    private Stack<int> _oldL = new Stack<int>();
     
     public MergeSort(SortingLogic logic, int n) : base(logic)
     {
-        _leftSubroutine = false;
-        _i = 0;
-        _j = n;
-        _k = 0;
-        _l = 0;
-        _r = 0;
-        _tempI = _i;
-        _tempJ = _j;
-    }
-
-    private void enterSubroutineWithExitState(SortingState state)
-    {
-        _continueLine.Push(state);
-    }
-
-    public void storeMainroutineValues()
-    {
-        _continueI.Push(_i);
-        _continueJ.Push(_j);
-        _continueK.Push(_k);
-        _i = _tempI;
-        _j = _tempJ;
-    }
-
-    private void leaveSubroutine()
-    {
-        if (_continueLine.Count == 0)
-        {
-            _nextState = SortingState.SS_None;
-            return;
-        }
-        _nextState = _continueLine.Pop();
-        _leftSubroutine = true;
-    }
-
-    private void continueValuesAfterSubroutine()
-    {
-        _leftSubroutine = false;
-        _oldI.Push(_i);
-        _oldJ.Push(_j);
-        _oldK.Push(_k);
-        _i = _continueI.Pop();
-        _j = _continueJ.Pop();
-        _k = _continueK.Pop();
-        sortingLogic.markCurrentSubset(_i, _j);
-    }
-
-    private void reverseValuesIntoSubroutine()
-    {
-        _i = _oldI.Pop();
-        _j = _oldJ.Pop();
-        _k = _oldK.Pop();
+        _nextState = new MergeSortingState(this, n);
     }
     
-    protected override void handleState(SortingState currentState)
+    private class MergeSortingState : SortingState
     {
-        if (_leftSubroutine)
+        public MergeSortingState(MergeSortingState old) : base(old) {}
+
+        public MergeSortingState(MergeSort algorithm, int n): base(algorithm)
         {
-            continueValuesAfterSubroutine();
+            _variables.Add("i", 0);
+            _variables.Add("j", n);
+            _variables.Add("k", 0);
+            _variables.Add("l", 0);
+            _variables.Add("r", 0);
         }
-        switch (currentState)
+
+        public override SortingState Next()
         {
-            case SortingState.SS_Line1: // mergeSort(A, i, j):
-                _nextState = SortingState.SS_Line2;
-                storeMainroutineValues();
-                sortingLogic.markCurrentSubset(_i, _j);
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line2: // if i<j-1:
-                if (_i < _j - 1)
-                {
-                    _nextState = SortingState.SS_Line3;
-                }
-                else
-                {
-                    leaveSubroutine();
-                }
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line3: // k = (i + j) // 2
-                _oldK.Push(_k);
-                _k = (_i + _j) / 2;
-                _nextState = SortingState.SS_Line4;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line4: // mergeSort(A,i,k)
-                enterSubroutineWithExitState(SortingState.SS_Line5);
-                _tempI = _i;
-                _tempJ = _k;
-                _nextState = SortingState.SS_Line1;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line5: // mergeSort(A,k,j)
-                enterSubroutineWithExitState(SortingState.SS_Line6);
-                _tempI = _k;
-                _tempJ = _j;
-                _nextState = SortingState.SS_Line1;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line6: // merge(A,i,k,j)
-                _nextState = SortingState.SS_Line8;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line7: // 
-                break;
-            case SortingState.SS_Line8: // merge(A, i, k, j):
-                _nextState = SortingState.SS_Line9;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line9: // r = k
-                _oldR.Push(_r);
-                _r = _k;
-                _nextState = SortingState.SS_Line10;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line10: // l = i
-                _oldL.Push(_l);
-                _l = _i;
-                _nextState = SortingState.SS_Line11;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line11: // while l < r and r < j:
-                if (_l < _r && _r < _j)
-                {
-                    _nextState = SortingState.SS_Line12;
-                }
-                else
-                {
-                    leaveSubroutine();
-                }
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line12: // if A[r] < A[l]:
-                if (sortingLogic.CompareGreater(_l, _r))
-                {
-                    _nextState = SortingState.SS_Line13;
-                }
-                else
-                {
-                    _nextState = SortingState.SS_Line15;
-                }
-                break;
-            case SortingState.SS_Line13: // insert(A,r,l)
-                _swaps++;
-                sortingLogic.Insert(_r,_l);
-                _nextState = SortingState.SS_Line14;
-                break;
-            case SortingState.SS_Line14: // r += 1
-                _r++;
-                _nextState = SortingState.SS_Line15;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line15: // l += 1
-                _l++;
-                _nextState = SortingState.SS_Line11;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_None:
-                sortingLogic.markCurrentSubset(0,0); //all to default
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            MergeSortingState next = new MergeSortingState(this);
+            next._line = _nextLine;
+            if (_nextValues != null)
+            {
+                next._variables = _nextValues;
+            }
+            return next;
         }
-    }
-    
-    protected override void handleReverseState(SortingState currentState)
-    {
-        switch (currentState)
+        
+        public override SortingState Copy()
         {
-            case SortingState.SS_Line1: // mergeSort(A, i, j):
-                _tempI = _i;
-                _tempJ = _j;
-                continueValuesAfterSubroutine();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line2: // if i<j-1:
-                _leftSubroutine = false;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line3: // k = (i + j) // 2
-                _k = _oldK.Pop();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line4: // mergeSort(A,i,k)
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line5: // mergeSort(A,k,j)
-                _leftSubroutine = true;
-                reverseValuesIntoSubroutine();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line6: // merge(A,i,k,j)
-                _leftSubroutine = true;
-                reverseValuesIntoSubroutine();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line7: // 
-                break;
-            case SortingState.SS_Line8: // merge(A, i, k, j):
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line9: // r = k
-                _r = _oldR.Pop();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line10: // l = i
-                _l = _oldL.Pop();
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line11: // while l < r and r < j:
-                _leftSubroutine = false;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line12: // if A[r] < A[l]:
-                sortingLogic.CompareGreater(_l, _r);
-                break;
-            case SortingState.SS_Line13: // insert(A,r,l)
-                _swaps--;
-                sortingLogic.Insert(_l,_r);
-                break;
-            case SortingState.SS_Line14: // r += 1
-                _r--;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line15: // l += 1
-                _l--;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_None:
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            MergeSortingState copy = new MergeSortingState(this);
+            return copy;
+        }
+
+        public override void Execute()
+        {
+            int i = _variables["i"];
+            int j = _variables["j"];
+            int k = _variables["k"];
+            int l = _variables["l"];
+            int r = _variables["r"];
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // mergeSort(A, i, j):
+                    _nextLine = SortingStateLine.SS_Line2;
+                    break;
+                case SortingStateLine.SS_Line2: // if i<j-1:
+                    if (i < j - 1)
+                    {
+                        _nextLine = SortingStateLine.SS_Line3;
+                    }
+                    else
+                    {
+                        leaveSubroutine();
+                    }
+                    break;
+                case SortingStateLine.SS_Line3: // k = (i + j) // 2
+                    k = (i + j) / 2;
+                    _nextLine = SortingStateLine.SS_Line4;
+                    break;
+                case SortingStateLine.SS_Line4: // mergeSort(A,i,k)
+                    enterSubroutineWithExitLine(SortingStateLine.SS_Line5);
+                    _nextValues = new Dictionary<string, int>(_variables);
+                    _nextValues["j"] = k;
+                    _nextLine = SortingStateLine.SS_Line1;
+                    break;
+                case SortingStateLine.SS_Line5: // mergeSort(A,k,j)
+                    enterSubroutineWithExitLine(SortingStateLine.SS_Line6);
+                    _nextValues = new Dictionary<string, int>(_variables);
+                    _nextValues["i"] = k;
+                    _nextLine = SortingStateLine.SS_Line1;
+                    break;
+                case SortingStateLine.SS_Line6: // merge(A,i,k,j)
+                    _nextLine = SortingStateLine.SS_Line8;
+                    break;
+                case SortingStateLine.SS_Line7: // 
+                    break;
+                case SortingStateLine.SS_Line8: // merge(A, i, k, j):
+                    _nextLine = SortingStateLine.SS_Line9;
+                    break;
+                case SortingStateLine.SS_Line9: // r = k
+                    r = k;
+                    _nextLine = SortingStateLine.SS_Line10;
+                    break;
+                case SortingStateLine.SS_Line10: // l = i
+                    l = i;
+                    _nextLine = SortingStateLine.SS_Line11;
+                    break;
+                case SortingStateLine.SS_Line11: // while l < r and r < j:
+                    if (l < r && r < j)
+                    {
+                        _nextLine = SortingStateLine.SS_Line12;
+                    }
+                    else
+                    {
+                        leaveSubroutine();
+                    }
+                    break;
+                case SortingStateLine.SS_Line12: // if A[r] < A[l]:
+                    if (_algorithm.CompareGreater(l, r))
+                    {
+                        _nextLine = SortingStateLine.SS_Line13;
+                    }
+                    else
+                    {
+                        _nextLine = SortingStateLine.SS_Line15;
+                    }
+                    _requireWait = true;
+                    break;
+                case SortingStateLine.SS_Line13: // insert(A,r,l)
+                    _algorithm.Insert(r,l);
+                    _nextLine = SortingStateLine.SS_Line14;
+                    _requireWait = true;
+                    break;
+                case SortingStateLine.SS_Line14: // r += 1
+                    r++;
+                    _nextLine = SortingStateLine.SS_Line15;
+                    break;
+                case SortingStateLine.SS_Line15: // l += 1
+                    l++;
+                    _nextLine = SortingStateLine.SS_Line11;
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
+
+            _variables["i"] = i;
+            _variables["j"] = j;
+            _variables["k"] = k;
+            _variables["l"] = l;
+            _variables["r"] = r;
+        }
+
+        public override void Undo()
+        {
+            _requireWait = false;
+            int i = _variables["i"];
+            int j = _variables["j"];
+            int l = _variables["l"];
+            int r = _variables["r"];
+            
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // mergeSort(A, i, j):
+                    break;
+                case SortingStateLine.SS_Line2: // if i<j-1:
+                    break;
+                case SortingStateLine.SS_Line3: // k = (i + j) // 2
+                    break;
+                case SortingStateLine.SS_Line4: // mergeSort(A,i,k)
+                    break;
+                case SortingStateLine.SS_Line5: // mergeSort(A,k,j)
+                    break;
+                case SortingStateLine.SS_Line6: // merge(A,i,k,j)
+                    break;
+                case SortingStateLine.SS_Line7: // 
+                    break;
+                case SortingStateLine.SS_Line8: // merge(A, i, k, j):
+                    break;
+                case SortingStateLine.SS_Line9: // r = k
+                    break;
+                case SortingStateLine.SS_Line10: // l = i
+                    break;
+                case SortingStateLine.SS_Line11: // while l < r and r < j:
+                    break;
+                case SortingStateLine.SS_Line12: // if A[r] < A[l]:
+                    break;
+                case SortingStateLine.SS_Line13: // insert(A,r,l)
+                    _algorithm.UndoInsert(r,l);
+                    _requireWait = true;
+                    break;
+                case SortingStateLine.SS_Line14: // r += 1
+                    break;
+                case SortingStateLine.SS_Line15: // l += 1
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
+        }
+
+        public override int GetSubsetStart()
+        {
+            return _variables["i"];
+        }
+        
+        public override int GetSubsetEnd()
+        {
+            return _variables["j"];
         }
     }
 }

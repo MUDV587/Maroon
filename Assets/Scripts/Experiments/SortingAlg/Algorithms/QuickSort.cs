@@ -26,204 +26,219 @@ public class QuickSort : SortingAlgorithm
             "    <style=\"command\">return</style> k"
         };
     }
-
-    private int _j;
-    private int _k;
-    private int _l;
-    private int _r;
-    private int _pInd;
-    
-    //Stacks for subroutine calling
-    private int _leftSubroutine;
-    private Stack<int> _continueL = new Stack<int>();
-    private Stack<int> _continueR = new Stack<int>();
-    private Stack<int> _continueK = new Stack<int>();
-    private Stack<SortingState> _continueLine = new Stack<SortingState>();
-    
-    //Stacks for reversing
-    private Stack<int> _oldK = new Stack<int>();
-    private Stack<int> _oldPInd = new Stack<int>();
     
     public QuickSort(SortingLogic logic, int n) : base(logic)
     {
-        _j = -1;
-        _k = 0;
-        _l = 0;
-        _r = n;
-        _pInd = 0;
-        _leftSubroutine = 0;
-    }
-
-    private void enterSubroutineWithExitState(SortingState state)
-    {
-        _continueL.Push(_l);
-        _continueR.Push(_r);
-        _continueK.Push(_k);
-        _continueLine.Push(state);
-    }
-
-    private void leaveSubroutine()
-    {
-        if (_continueLine.Count == 0)
-        {
-            _nextState = SortingState.SS_None;
-            return;
-        }
-        _nextState = _continueLine.Pop();
-        _leftSubroutine++;
-        if (_nextState == SortingState.SS_Line6) //Line6 is dummy for leaving
-        {
-            leaveSubroutine();
-        }
-    }
-
-    private void continueValuesAfterSubroutine()
-    {
-        while (_leftSubroutine > 0)
-        {
-            _l = _continueL.Pop();
-            _r = _continueR.Pop();
-            _k = _continueK.Pop();
-            _leftSubroutine--;
-        }
-        sortingLogic.markCurrentSubset(_l, _r);
+        _nextState = new QuickSortingState(this, n);
     }
     
-    protected override void handleState(SortingState currentState)
+    private class QuickSortingState : SortingState
     {
-        if (_leftSubroutine > 0)
+        private int _pInd;
+
+        public QuickSortingState(QuickSortingState old) : base(old)
         {
-            continueValuesAfterSubroutine();
+            _pInd = old._pInd;
         }
-        switch (currentState)
+
+        public QuickSortingState(QuickSort algorithm, int n): base(algorithm)
         {
-            case SortingState.SS_Line1: // quickSort(l,r):
-                _nextState = SortingState.SS_Line2;
-                sortingLogic.markCurrentSubset(_l, _r);
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line2: // if(l<r-1):
-                if (_l < _r - 1)
-                {
-                    _nextState = SortingState.SS_Line3;
-                }
-                else
-                {
-                    leaveSubroutine();
-                }
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line3: // k = partition(l,r)
-                _oldK.Push(_k);
-                _nextState = SortingState.SS_Line7;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line4: // quickSort(l,k)
-                enterSubroutineWithExitState(SortingState.SS_Line5);
-                _r = _k;
-                _j = _l-1;
-                _nextState = SortingState.SS_Line1;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line5: // quickSort(k+1,r)
-                enterSubroutineWithExitState(SortingState.SS_Line6);
-                _l = _k + 1;
-                _j = _l-1;
-                _nextState = SortingState.SS_Line1;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line6: // 
-                //dummy for leaving subroutine after finishing Line 5
-                break;
-            case SortingState.SS_Line7: // partition(l, r):
-                _nextState = SortingState.SS_Line8;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line8: // p = A[r-1]
-                //we use the index of p instead
-                //TODO: Set visual for pivot
-                _oldPInd.Push(_pInd);
-                _pInd = _r-1;
-                _nextState = SortingState.SS_Line9;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line9: // k = l
-                _oldK.Push(_k);
-                _k = _l;
-                _nextState = SortingState.SS_Line10;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line10: // for j in range(l,r-1):
-                _j++;
-                if (_j < _r - 1)
-                {
-                    _nextState = SortingState.SS_Line11;
-                }
-                else
-                {
-                    _nextState = SortingState.SS_Line14;
-                }
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line11: // if A[j] <= p:
-                if (sortingLogic.CompareGreater(_j, _pInd))
-                {
-                    _nextState = SortingState.SS_Line10;
-                }
-                else
-                {
-                    _nextState = SortingState.SS_Line12;
-                }
-                break;
-            case SortingState.SS_Line12: // swap(j,k)
-                _nextState = SortingState.SS_Line13;
-                if (_j != _k)
-                {
-                    _swaps++;
-                    sortingLogic.Swap(_j, _k);
-                }
-                else
-                {
-                    sortingLogic.MoveFinished();
-                }
-                break;
-            case SortingState.SS_Line13: // k = k+1
-                _k++;
-                _nextState = SortingState.SS_Line10;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_Line14: // swap(k,r-1)
-                _nextState = SortingState.SS_Line15;
-                if (_k != _r - 1)
-                {
-                    _swaps++;
-                    sortingLogic.Swap(_k, _r - 1);
-                }
-                else
-                {
-                    sortingLogic.MoveFinished();
-                }
-                break;
-            case SortingState.SS_Line15: // return k
-                _nextState = SortingState.SS_Line4;
-                sortingLogic.MoveFinished();
-                break;
-            case SortingState.SS_None:
-                sortingLogic.markCurrentSubset(0,0); //all to default
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            _variables.Add("j", -1);
+            _variables.Add("k", 0);
+            _variables.Add("l", 0);
+            _variables.Add("r", n);
         }
-    }
-    
-    protected override void handleReverseState(SortingState currentState)
-    {
-        switch (currentState)
+
+        public override SortingState Next()
         {
-            case SortingState.SS_None:
-                sortingLogic.sortingFinished();
-                sortingLogic.MoveFinished();
-                break;
+            QuickSortingState next = new QuickSortingState(this);
+            next._line = _nextLine;
+            if (_nextValues != null)
+            {
+                next._variables = _nextValues;
+            }
+            return next;
+        }
+        
+        public override SortingState Copy()
+        {
+            QuickSortingState copy = new QuickSortingState(this);
+            return copy;
+        }
+
+        public override void Execute()
+        {
+            int j = _variables["j"];
+            int k = _variables["k"];
+            int l = _variables["l"];
+            int r = _variables["r"];
+            
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // quickSort(l,r):
+                    _nextLine = SortingStateLine.SS_Line2;
+                    break;
+                case SortingStateLine.SS_Line2: // if(l<r-1):
+                    if (l < r - 1)
+                    {
+                        _nextLine = SortingStateLine.SS_Line3;
+                    }
+                    else
+                    {
+                        leaveSubroutine();
+                    }
+                    break;
+                case SortingStateLine.SS_Line3: // k = partition(l,r)
+                    _nextLine = SortingStateLine.SS_Line7;
+                    break;
+                case SortingStateLine.SS_Line4: // quickSort(l,k)
+                    enterSubroutineWithExitLine(SortingStateLine.SS_Line5);
+                    _nextValues = new Dictionary<string, int>(_variables);
+                    _nextValues["r"] = k;
+                    _nextLine = SortingStateLine.SS_Line1;
+                    break;
+                case SortingStateLine.SS_Line5: // quickSort(k+1,r)
+                    enterSubroutineWithExitLine(SortingStateLine.SS_None);
+                    _nextValues = new Dictionary<string, int>(_variables);
+                    _nextValues["l"] = k+1;
+                    _nextLine = SortingStateLine.SS_Line1;
+                    break;
+                case SortingStateLine.SS_Line6: //
+                    break;
+                case SortingStateLine.SS_Line7: // partition(l, r):
+                    _nextLine = SortingStateLine.SS_Line8;
+                    break;
+                case SortingStateLine.SS_Line8: // p = A[r-1]
+                    //we use the index of p instead
+                    //TODO: Set visual for pivot
+                    _pInd = r-1;
+                    _nextLine = SortingStateLine.SS_Line9;
+                    break;
+                case SortingStateLine.SS_Line9: // k = l
+                    k = l;
+                    _nextValues = new Dictionary<string, int>(_variables);
+                    _nextValues["j"] = l-1;
+                    _nextValues["k"] = l;
+                    _nextLine = SortingStateLine.SS_Line10;
+                    break;
+                case SortingStateLine.SS_Line10: // for j in range(l,r-1):
+                    j++;
+                    if (j < r - 1)
+                    {
+                        _nextLine = SortingStateLine.SS_Line11;
+                    }
+                    else
+                    {
+                        _nextLine = SortingStateLine.SS_Line14;
+                    }
+                    break;
+                case SortingStateLine.SS_Line11: // if A[j] <= p:
+                    if (_algorithm.CompareGreater(j, _pInd))
+                    {
+                        _nextLine = SortingStateLine.SS_Line10;
+                    }
+                    else
+                    {
+                        _nextLine = SortingStateLine.SS_Line12;
+                    }
+                    _requireWait = true;
+                    break;
+                case SortingStateLine.SS_Line12: // swap(j,k)
+                    _nextLine = SortingStateLine.SS_Line13;
+                    if (j != k)
+                    {
+                        _algorithm.Swap(j,k);
+                        _requireWait = true;
+                    }
+                    break;
+                case SortingStateLine.SS_Line13: // k = k+1
+                    k++;
+                    _nextLine = SortingStateLine.SS_Line10;
+                    break;
+                case SortingStateLine.SS_Line14: // swap(k,r-1)
+                    _nextLine = SortingStateLine.SS_Line15;
+                    if (k != r - 1)
+                    {
+                        _algorithm.Swap(k,r-1);
+                        _requireWait = true;
+                    }
+                    break;
+                case SortingStateLine.SS_Line15: // return k
+                    _nextLine = SortingStateLine.SS_Line4;
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
+            
+            _variables["j"] = j;
+            _variables["k"] = k;
+            _variables["l"] = l;
+            _variables["r"] = r;
+        }
+
+        public override void Undo()
+        {
+            _requireWait = false;
+            int j = _variables["j"];
+            int k = _variables["k"];
+            int l = _variables["l"];
+            int r = _variables["r"];
+            
+            switch (_line)
+            {
+                case SortingStateLine.SS_Line1: // quickSort(l,r):
+                    break;
+                case SortingStateLine.SS_Line2: // if(l<r-1):
+                    break;
+                case SortingStateLine.SS_Line3: // k = partition(l,r)
+                    break;
+                case SortingStateLine.SS_Line4: // quickSort(l,k)
+                    break;
+                case SortingStateLine.SS_Line5: // quickSort(k+1,r)
+                    break;
+                case SortingStateLine.SS_Line6: //
+                    break;
+                case SortingStateLine.SS_Line7: // partition(l, r):
+                    break;
+                case SortingStateLine.SS_Line8: // p = A[r-1]
+                    break;
+                case SortingStateLine.SS_Line9: // k = l
+                    break;
+                case SortingStateLine.SS_Line10: // for j in range(l,r-1):
+                    break;
+                case SortingStateLine.SS_Line11: // if A[j] <= p:
+                    break;
+                case SortingStateLine.SS_Line12: // swap(j,k)
+                    if (j != k)
+                    {
+                        _algorithm.UndoSwap(j,k);
+                        _requireWait = true;
+                    }
+                    break;
+                case SortingStateLine.SS_Line13: // k = k+1
+                    break;
+                case SortingStateLine.SS_Line14: // swap(k,r-1)
+                    if (k != r - 1)
+                    {
+                        _algorithm.UndoSwap(k,r-1);
+                        _requireWait = true;
+                    }
+                    break;
+                case SortingStateLine.SS_Line15: // return k
+                    break;
+                case SortingStateLine.SS_None:
+                    break;
+            }
+        }
+
+        public override int GetSubsetStart()
+        {
+            return _variables["l"];
+        }
+        
+        public override int GetSubsetEnd()
+        {
+            return _variables["r"];
         }
     }
 }

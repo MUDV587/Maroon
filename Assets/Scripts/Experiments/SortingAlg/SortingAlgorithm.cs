@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public abstract class SortingAlgorithm
@@ -7,7 +8,13 @@ public abstract class SortingAlgorithm
     public SortingLogic sortingLogic;
     abstract public List<string> pseudocode { get; }
     
-    protected enum SortingState
+    protected Stack<SortingState> _executedStates = new Stack<SortingState>();
+    protected SortingState _nextState;
+    
+    protected int _operations;
+    protected int _swaps;
+    
+    protected enum SortingStateLine
     {
         SS_None,
         SS_Line1,
@@ -26,12 +33,86 @@ public abstract class SortingAlgorithm
         SS_Line14,
         SS_Line15
     }
-    
-    protected Stack<SortingState> _executedStates = new Stack<SortingState>();
-    protected SortingState _nextState;
-    
-    protected int _operations;
-    protected int _swaps;
+
+    protected class SortingState
+    {
+        protected SortingAlgorithm _algorithm;
+        
+        protected SortingStateLine _line;
+        protected SortingStateLine _nextLine;
+        protected Dictionary<string, int> _variables = new Dictionary<string, int>();
+        public bool _requireWait;
+        
+        //Stacks for subroutine calling
+        protected Stack<Dictionary<string, int>> _valueStore = new Stack<Dictionary<string, int>>();
+        protected Stack<SortingStateLine> _continueLine = new Stack<SortingStateLine>();
+        //when this variable is set, the next state will start with _variables set to _nextValues
+        protected Dictionary<string, int> _nextValues = null;
+
+        public virtual SortingState Next() {return this;}
+        public virtual SortingState Copy() {return this;}
+
+        public virtual void Execute() {}
+        public virtual void Undo() {}
+        
+        public virtual int GetSubsetStart() {return 0;}
+        public virtual int GetSubsetEnd() {return 0;}
+
+        public SortingState()
+        {
+            _line = SortingStateLine.SS_None;
+        }
+        
+        public SortingState(SortingAlgorithm algorithm)
+        {
+            _algorithm = algorithm;
+            
+            _line = SortingStateLine.SS_Line1;
+            _nextLine = SortingStateLine.SS_Line2;
+            _requireWait = false;
+        }
+        
+        public SortingState(SortingState old)
+        {
+            _algorithm = old._algorithm;
+            _line = old._line;
+            _nextLine = old._nextLine;
+            _variables = new Dictionary<string, int>(old._variables);
+            _requireWait = false;
+            
+            //subroutine
+            _nextValues = null;
+            _continueLine = old._continueLine;
+            _valueStore = old._valueStore;
+        }
+
+        public SortingStateLine GetLine()
+        {
+            return _line;
+        }
+        
+        protected void enterSubroutineWithExitLine(SortingStateLine line)
+        {
+            _continueLine.Push(line);
+            _valueStore.Push(new Dictionary<string, int>(_variables));
+        }
+
+        protected void leaveSubroutine()
+        {
+            if (_continueLine.Count == 0)
+            {
+                _nextLine = SortingStateLine.SS_None;
+                return;
+            }
+            _nextLine = _continueLine.Pop();
+            _nextValues = _valueStore.Pop();
+            if (_nextLine == SortingStateLine.SS_None)
+            {
+                //leave more than one subroutine at once
+                leaveSubroutine();
+            }
+        }
+    }
 
     public SortingAlgorithm(SortingLogic logic)
     {
@@ -40,39 +121,79 @@ public abstract class SortingAlgorithm
         _operations = 0;
         _swaps = 0;
         
-        _executedStates.Push(SortingState.SS_None); //To check if at beginning
-        _nextState = SortingState.SS_Line1;
+        _executedStates.Push(new SortingState());
     }
 
     public void ExecuteNextState()
     {
-        sortingLogic.setPseudocode((int)_nextState);
-        if (_nextState != SortingState.SS_None)
+        sortingLogic.setPseudocode((int)_nextState.GetLine());
+        if (_nextState.GetLine() != SortingStateLine.SS_None)
         {
             _operations++;
-            _executedStates.Push(_nextState);
+            _executedStates.Push(_nextState.Copy());
+            _nextState.Execute();
+            sortingLogic.markCurrentSubset(_nextState.GetSubsetStart(), _nextState.GetSubsetEnd());
+            if (!_nextState._requireWait)
+            {
+                sortingLogic.MoveFinished();
+            }
+            _nextState = _nextState.Next();
         }
-        handleState(_nextState);
+        else
+        {
+            sortingLogic.MoveFinished();
+            sortingLogic.sortingFinished();
+        }
         sortingLogic.setSwapsOperations(_swaps, _operations);
     }
 
     public void ExecutePreviousState()
     {
-        if (_executedStates.Peek() == SortingState.SS_None)
+        if (_executedStates.Peek().GetLine() == SortingStateLine.SS_None)
         {
-            _nextState = SortingState.SS_Line1;
-            sortingLogic.MoveFinished();
             _operations = 0;
             _swaps = 0;
+            sortingLogic.MoveFinished();
             return;
         }
-        _nextState = _executedStates.Pop();
-        sortingLogic.setPseudocode((int)_executedStates.Peek());
         _operations--;
-        handleReverseState(_nextState);
+        _nextState = _executedStates.Pop();
+        sortingLogic.setPseudocode((int)_executedStates.Peek().GetLine());
+        _nextState.Undo();
+        sortingLogic.markCurrentSubset(_executedStates.Peek().GetSubsetStart(), _executedStates.Peek().GetSubsetEnd());
+        if (!_nextState._requireWait)
+        {
+            sortingLogic.MoveFinished();
+        }
         sortingLogic.setSwapsOperations(_swaps, _operations);
     }
 
-    protected virtual void handleState(SortingState currentState) {}
-    protected virtual void handleReverseState(SortingState currentState) {}
+    public void Swap(int ind1, int ind2)
+    {
+        _swaps++;
+        sortingLogic.Swap(ind1, ind2);
+    }
+    
+    public void UndoSwap(int ind1, int ind2)
+    {
+        _swaps--;
+        sortingLogic.Swap(ind2, ind1);
+    }
+    
+    public void Insert(int ind1, int ind2)
+    {
+        _swaps++;
+        sortingLogic.Insert(ind1, ind2);
+    }
+    
+    public void UndoInsert(int ind1, int ind2)
+    {
+        _swaps--;
+        sortingLogic.Insert(ind2, ind1);
+    }
+
+    public bool CompareGreater(int ind1, int ind2)
+    {
+        return sortingLogic.CompareGreater(ind1, ind2);
+    }
 }
