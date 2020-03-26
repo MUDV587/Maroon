@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class QuickSort : SortingAlgorithm
@@ -47,6 +48,7 @@ public class QuickSort : SortingAlgorithm
             _variables.Add("k", 0);
             _variables.Add("l", 0);
             _variables.Add("r", n-1);
+            _pInd = -1;
         }
 
         public override SortingState Next()
@@ -77,6 +79,7 @@ public class QuickSort : SortingAlgorithm
             {
                 case SortingStateLine.SS_Line1: // quickSort(l,r):
                     _nextLine = SortingStateLine.SS_Line2;
+                    _pInd = -1;
                     break;
                 case SortingStateLine.SS_Line2: // if(l<r):
                     if (l < r)
@@ -159,11 +162,16 @@ public class QuickSort : SortingAlgorithm
                     _nextLine = SortingStateLine.SS_Line15;
                     if (k != r)
                     {
+                        if (_pInd == k) //Just for reversing
+                        {
+                            _pInd = r;
+                        }
                         _algorithm.Swap(k,r);
                         _requireWait = true;
                     }
                     break;
                 case SortingStateLine.SS_Line15: // return k
+                    _pInd = k;
                     _nextLine = SortingStateLine.SS_Line4;
                     break;
                 case SortingStateLine.SS_None:
@@ -220,11 +228,13 @@ public class QuickSort : SortingAlgorithm
                 case SortingStateLine.SS_Line14: // swap(k,r)
                     if (k != r)
                     {
+                        _pInd = k;
                         _algorithm.UndoSwap(k,r);
                         _requireWait = true;
                     }
                     break;
                 case SortingStateLine.SS_Line15: // return k
+                    _pInd = k;
                     break;
                 case SortingStateLine.SS_None:
                     break;
@@ -239,6 +249,11 @@ public class QuickSort : SortingAlgorithm
         public override int GetSubsetEnd()
         {
             return _variables["r"];
+        }
+
+        public override int GetPivot()
+        {
+            return _pInd;
         }
     }
 }

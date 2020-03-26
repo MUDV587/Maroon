@@ -57,6 +57,8 @@ public abstract class SortingAlgorithm
         
         public virtual int GetSubsetStart() {return 0;}
         public virtual int GetSubsetEnd() {return 0;}
+        
+        public virtual int GetPivot() {return -1;}
 
         public SortingState()
         {
@@ -138,6 +140,7 @@ public abstract class SortingAlgorithm
             _executedStates.Push(_nextState.Copy());
             _nextState.Execute();
             sortingLogic.markCurrentSubset(_nextState.GetSubsetStart(), _nextState.GetSubsetEnd());
+            sortingLogic.markPivot(_nextState.GetPivot());
             sortingLogic.displayIndices(_nextState.GetVariables());
             if (!_nextState._requireWait)
             {
@@ -160,6 +163,7 @@ public abstract class SortingAlgorithm
             _operations = 0;
             _swaps = 0;
             sortingLogic.MoveFinished();
+            sortingLogic.markCurrentSubset(-1,-1);
             return;
         }
         _operations--;
@@ -167,6 +171,7 @@ public abstract class SortingAlgorithm
         sortingLogic.setPseudocode((int)_executedStates.Peek().GetLine());
         _nextState.Undo();
         sortingLogic.markCurrentSubset(_executedStates.Peek().GetSubsetStart(), _executedStates.Peek().GetSubsetEnd());
+        sortingLogic.markPivot(_nextState.GetPivot());
         sortingLogic.displayIndices(_executedStates.Peek().GetVariables());
         if (!_nextState._requireWait)
         {

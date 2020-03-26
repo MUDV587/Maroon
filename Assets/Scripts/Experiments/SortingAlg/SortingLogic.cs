@@ -65,11 +65,11 @@ public class SortingLogic : MonoBehaviour
         if(currentSize != arraySize)
             CreateArray(arraySize);
 
-        /*if (!_waitForMachine && _currentlySorting)
+        if (!_waitForMachine && _currentlySorting)
         {
             _waitForMachine = true;
             _algorithm.ExecuteNextState();
-        }*/
+        }
 
         
         //TODO: Just for debugging, should be done by controller
@@ -237,6 +237,14 @@ public class SortingLogic : MonoBehaviour
             {
                 ArrayPlaces[i].sortElement.GetComponent<SortingElement>().resetToDefaultColor();
             }
+        }
+    }
+
+    public void markPivot(int pivot)
+    {
+        if (pivot != -1)
+        {
+            ArrayPlaces[pivot].sortElement.GetComponent<SortingElement>().SetPivotColor();
         }
     }
 

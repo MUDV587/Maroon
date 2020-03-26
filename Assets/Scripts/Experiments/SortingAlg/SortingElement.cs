@@ -60,13 +60,20 @@ public class SortingElement : MonoBehaviour
 
     public void resetToDefaultColor()
     {
-        color.b = 0.0f;
         color.r = (float) number * 8.0f / 1000.0f + 0.2f;
+        color.g = 0.0f;
+        color.b = 0.0f;
     }
 
     public void markActiveColor()
     {
-        color.b = (float) number * 8.0f / 1000.0f + 0.2f;
         color.r = 0.0f;
+        color.g = 0.0f;
+        color.b = (float) number * 8.0f / 1000.0f + 0.2f;
+    }
+
+    public void SetPivotColor()
+    {
+        color.g = 1.0f;
     }
 }
