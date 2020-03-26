@@ -177,7 +177,7 @@ public class SortingLogic : MonoBehaviour
     public void sortingFinished()
     {
         _currentlySorting = false;
-        markCurrentSubset(0,0);
+        markCurrentSubset(-1,-1);
     }
 
     public void RearrangeArrayElements(float speed)
@@ -229,7 +229,7 @@ public class SortingLogic : MonoBehaviour
     {
         for (int i = 0; i < ArrayPlaces.Count; ++i)
         {
-            if (i >= from && i < to)
+            if (i >= from && i <= to)
             {
                 ArrayPlaces[i].sortElement.GetComponent<SortingElement>().markActiveColor();
             }

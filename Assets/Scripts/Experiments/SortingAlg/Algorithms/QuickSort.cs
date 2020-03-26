@@ -10,19 +10,19 @@ public class QuickSort : SortingAlgorithm
         {
             "<style=\"header\">Quick Sort:</style>",
             "<style=\"function\">quickSort</style>(l, r):",
-            "    <style=\"command\">if</style> l<r-<style=\"number\">1</style>:",
+            "    <style=\"command\">if</style> l<r:",
             "        k = <style=\"function\">partition</style>(l,r)",
-            "        <style=\"function\">quickSort</style>(l,k)",
+            "        <style=\"function\">quickSort</style>(l,k-<style=\"number\">1</style>)",
             "        <style=\"function\">quickSort</style>(k+<style=\"number\">1</style>,r)",
             "",
             "<style=\"function\">partition</style>(l, r):",
-            "    p = A[r-<style=\"number\">1</style>] <style=\"comment\">//pivot element</style>",
+            "    p = A[r] <style=\"comment\">//pivot element</style>",
             "    k = l",
             "    <style=\"command\">for</style> j = l .. r-<style=\"number\">1</style>:",
             "        <style=\"command\">if</style> A[j]<=p:",
             "            <style=\"function\">swap</style>(j,k)",
             "            k = k+<style=\"number\">1</style>",
-            "    <style=\"function\">swap</style>(k,r-<style=\"number\">1</style>)",
+            "    <style=\"function\">swap</style>(k,r)",
             "    <style=\"command\">return</style> k"
         };
     }
@@ -46,7 +46,7 @@ public class QuickSort : SortingAlgorithm
             _variables.Add("j", -1);
             _variables.Add("k", 0);
             _variables.Add("l", 0);
-            _variables.Add("r", n);
+            _variables.Add("r", n-1);
         }
 
         public override SortingState Next()
@@ -78,8 +78,8 @@ public class QuickSort : SortingAlgorithm
                 case SortingStateLine.SS_Line1: // quickSort(l,r):
                     _nextLine = SortingStateLine.SS_Line2;
                     break;
-                case SortingStateLine.SS_Line2: // if(l<r-1):
-                    if (l < r - 1)
+                case SortingStateLine.SS_Line2: // if(l<r):
+                    if (l < r)
                     {
                         _nextLine = SortingStateLine.SS_Line3;
                     }
@@ -91,10 +91,10 @@ public class QuickSort : SortingAlgorithm
                 case SortingStateLine.SS_Line3: // k = partition(l,r)
                     _nextLine = SortingStateLine.SS_Line7;
                     break;
-                case SortingStateLine.SS_Line4: // quickSort(l,k)
+                case SortingStateLine.SS_Line4: // quickSort(l,k-1)
                     enterSubroutineWithExitLine(SortingStateLine.SS_Line5);
                     _nextValues = new Dictionary<string, int>(_variables);
-                    _nextValues["r"] = k;
+                    _nextValues["r"] = k-1;
                     _nextLine = SortingStateLine.SS_Line1;
                     break;
                 case SortingStateLine.SS_Line5: // quickSort(k+1,r)
@@ -108,10 +108,10 @@ public class QuickSort : SortingAlgorithm
                 case SortingStateLine.SS_Line7: // partition(l, r):
                     _nextLine = SortingStateLine.SS_Line8;
                     break;
-                case SortingStateLine.SS_Line8: // p = A[r-1]
+                case SortingStateLine.SS_Line8: // p = A[r]
                     //we use the index of p instead
                     //TODO: Set visual for pivot
-                    _pInd = r-1;
+                    _pInd = r;
                     _nextLine = SortingStateLine.SS_Line9;
                     break;
                 case SortingStateLine.SS_Line9: // k = l
@@ -121,9 +121,9 @@ public class QuickSort : SortingAlgorithm
                     _nextValues["k"] = l;
                     _nextLine = SortingStateLine.SS_Line10;
                     break;
-                case SortingStateLine.SS_Line10: // for j in range(l,r-1):
+                case SortingStateLine.SS_Line10: // for j in range(l,r):
                     j++;
-                    if (j < r - 1)
+                    if (j < r)
                     {
                         _nextLine = SortingStateLine.SS_Line11;
                     }
@@ -155,11 +155,11 @@ public class QuickSort : SortingAlgorithm
                     k++;
                     _nextLine = SortingStateLine.SS_Line10;
                     break;
-                case SortingStateLine.SS_Line14: // swap(k,r-1)
+                case SortingStateLine.SS_Line14: // swap(k,r)
                     _nextLine = SortingStateLine.SS_Line15;
-                    if (k != r - 1)
+                    if (k != r)
                     {
-                        _algorithm.Swap(k,r-1);
+                        _algorithm.Swap(k,r);
                         _requireWait = true;
                     }
                     break;
@@ -188,11 +188,11 @@ public class QuickSort : SortingAlgorithm
             {
                 case SortingStateLine.SS_Line1: // quickSort(l,r):
                     break;
-                case SortingStateLine.SS_Line2: // if(l<r-1):
+                case SortingStateLine.SS_Line2: // if(l<r):
                     break;
                 case SortingStateLine.SS_Line3: // k = partition(l,r)
                     break;
-                case SortingStateLine.SS_Line4: // quickSort(l,k)
+                case SortingStateLine.SS_Line4: // quickSort(l,k-1)
                     break;
                 case SortingStateLine.SS_Line5: // quickSort(k+1,r)
                     break;
@@ -200,11 +200,11 @@ public class QuickSort : SortingAlgorithm
                     break;
                 case SortingStateLine.SS_Line7: // partition(l, r):
                     break;
-                case SortingStateLine.SS_Line8: // p = A[r-1]
+                case SortingStateLine.SS_Line8: // p = A[r]
                     break;
                 case SortingStateLine.SS_Line9: // k = l
                     break;
-                case SortingStateLine.SS_Line10: // for j in range(l,r-1):
+                case SortingStateLine.SS_Line10: // for j in range(l,r):
                     break;
                 case SortingStateLine.SS_Line11: // if A[j] <= p:
                     break;
@@ -217,10 +217,10 @@ public class QuickSort : SortingAlgorithm
                     break;
                 case SortingStateLine.SS_Line13: // k = k+1
                     break;
-                case SortingStateLine.SS_Line14: // swap(k,r-1)
-                    if (k != r - 1)
+                case SortingStateLine.SS_Line14: // swap(k,r)
+                    if (k != r)
                     {
-                        _algorithm.UndoSwap(k,r-1);
+                        _algorithm.UndoSwap(k,r);
                         _requireWait = true;
                     }
                     break;

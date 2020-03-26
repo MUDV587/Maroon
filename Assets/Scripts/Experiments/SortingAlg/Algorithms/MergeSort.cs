@@ -11,16 +11,16 @@ public class MergeSort : SortingAlgorithm
         {
             "<style=\"header\">Merge Sort:</style>",
             "<style=\"function\">mergeSort</style>(i, j):",
-            "    <style=\"command\">if</style> i<j-<style=\"number\">1</style>:",
+            "    <style=\"command\">if</style> i<j:",
             "        k = (i+j)/<style=\"number\">2</style>",
             "        <style=\"function\">mergeSort</style>(i,k)",
-            "        <style=\"function\">mergeSort</style>(k,j)",
+            "        <style=\"function\">mergeSort</style>(k+<style=\"number\">1</style>,j)",
             "        <style=\"function\">merge</style>(i,k,j)",
             "",
             "<style=\"function\">merge</style>(i, k, j):",
-            "    r = k",
+            "    r = k+1",
             "    l = i",
-            "    <style=\"command\">while</style> l<r <style=\"command\">and</style> r<j:",
+            "    <style=\"command\">while</style> l<r <style=\"command\">and</style> r<=j:",
             "        <style=\"command\">if</style> A[r]<A[l]:",
             "            <style=\"function\">insert</style>(r,l)",
             "            r = r+<style=\"number\">1</style>",
@@ -40,7 +40,7 @@ public class MergeSort : SortingAlgorithm
         public MergeSortingState(MergeSort algorithm, int n): base(algorithm)
         {
             _variables.Add("i", 0);
-            _variables.Add("j", n);
+            _variables.Add("j", n-1);
             _variables.Add("k", 0);
             _variables.Add("l", 0);
             _variables.Add("r", 0);
@@ -75,8 +75,8 @@ public class MergeSort : SortingAlgorithm
                 case SortingStateLine.SS_Line1: // mergeSort(A, i, j):
                     _nextLine = SortingStateLine.SS_Line2;
                     break;
-                case SortingStateLine.SS_Line2: // if i<j-1:
-                    if (i < j - 1)
+                case SortingStateLine.SS_Line2: // if i<j:
+                    if (i < j)
                     {
                         _nextLine = SortingStateLine.SS_Line3;
                     }
@@ -95,10 +95,10 @@ public class MergeSort : SortingAlgorithm
                     _nextValues["j"] = k;
                     _nextLine = SortingStateLine.SS_Line1;
                     break;
-                case SortingStateLine.SS_Line5: // mergeSort(A,k,j)
+                case SortingStateLine.SS_Line5: // mergeSort(A,k+1,j)
                     enterSubroutineWithExitLine(SortingStateLine.SS_Line6);
                     _nextValues = new Dictionary<string, int>(_variables);
-                    _nextValues["i"] = k;
+                    _nextValues["i"] = k+1;
                     _nextLine = SortingStateLine.SS_Line1;
                     break;
                 case SortingStateLine.SS_Line6: // merge(A,i,k,j)
@@ -109,16 +109,16 @@ public class MergeSort : SortingAlgorithm
                 case SortingStateLine.SS_Line8: // merge(A, i, k, j):
                     _nextLine = SortingStateLine.SS_Line9;
                     break;
-                case SortingStateLine.SS_Line9: // r = k
-                    r = k;
+                case SortingStateLine.SS_Line9: // r = k+1
+                    r = k+1;
                     _nextLine = SortingStateLine.SS_Line10;
                     break;
                 case SortingStateLine.SS_Line10: // l = i
                     l = i;
                     _nextLine = SortingStateLine.SS_Line11;
                     break;
-                case SortingStateLine.SS_Line11: // while l < r and r < j:
-                    if (l < r && r < j)
+                case SortingStateLine.SS_Line11: // while l < r and r <= j:
+                    if (l < r && r <= j)
                     {
                         _nextLine = SortingStateLine.SS_Line12;
                     }
@@ -174,13 +174,13 @@ public class MergeSort : SortingAlgorithm
             {
                 case SortingStateLine.SS_Line1: // mergeSort(A, i, j):
                     break;
-                case SortingStateLine.SS_Line2: // if i<j-1:
+                case SortingStateLine.SS_Line2: // if i<j:
                     break;
                 case SortingStateLine.SS_Line3: // k = (i + j) // 2
                     break;
                 case SortingStateLine.SS_Line4: // mergeSort(A,i,k)
                     break;
-                case SortingStateLine.SS_Line5: // mergeSort(A,k,j)
+                case SortingStateLine.SS_Line5: // mergeSort(A,k+1,j)
                     break;
                 case SortingStateLine.SS_Line6: // merge(A,i,k,j)
                     break;
@@ -188,11 +188,11 @@ public class MergeSort : SortingAlgorithm
                     break;
                 case SortingStateLine.SS_Line8: // merge(A, i, k, j):
                     break;
-                case SortingStateLine.SS_Line9: // r = k
+                case SortingStateLine.SS_Line9: // r = k+1
                     break;
                 case SortingStateLine.SS_Line10: // l = i
                     break;
-                case SortingStateLine.SS_Line11: // while l < r and r < j:
+                case SortingStateLine.SS_Line11: // while l < r and r <= j:
                     break;
                 case SortingStateLine.SS_Line12: // if A[r] < A[l]:
                     break;
