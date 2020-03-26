@@ -65,12 +65,19 @@ public class ArrayPlace : MonoBehaviour
         return current;
     }
 
-    private void UpdateIndex()
+    public void UpdateIndex(string indexText = "")
     {
         var textField = GetComponentInChildren<TextMeshPro>();
         if (textField)
         {
-            textField.text = _index.ToString("0");
+            if (indexText == "" && textField.text != _index.ToString("0"))
+            {
+                textField.text = _index.ToString("0");
+            }
+            if (indexText != "" && textField.text != indexText)
+            {
+                textField.text = indexText;
+            }
         }
     }
 

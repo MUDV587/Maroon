@@ -239,4 +239,20 @@ public class SortingLogic : MonoBehaviour
             }
         }
     }
+
+    public void displayIndices(Dictionary<string, int> indices)
+    {
+        for (int i = 0; i < _arrayPlaces.Count; ++i)
+        {
+            List<string> matches = new List<string>();
+            foreach (var pair in indices)
+            {
+                if (pair.Value == i)
+                {
+                    matches.Add("<b><color=#006666>" + pair.Key + "</color></b>");
+                }
+            }
+            _arrayPlaces[i].UpdateIndex(string.Join(",", matches));
+        }
+    }
 }

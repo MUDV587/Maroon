@@ -90,6 +90,11 @@ public abstract class SortingAlgorithm
         {
             return _line;
         }
+
+        public Dictionary<string, int> GetVariables()
+        {
+            return _variables;
+        }
         
         protected void enterSubroutineWithExitLine(SortingStateLine line)
         {
@@ -133,6 +138,7 @@ public abstract class SortingAlgorithm
             _executedStates.Push(_nextState.Copy());
             _nextState.Execute();
             sortingLogic.markCurrentSubset(_nextState.GetSubsetStart(), _nextState.GetSubsetEnd());
+            sortingLogic.displayIndices(_nextState.GetVariables());
             if (!_nextState._requireWait)
             {
                 sortingLogic.MoveFinished();
@@ -161,6 +167,7 @@ public abstract class SortingAlgorithm
         sortingLogic.setPseudocode((int)_executedStates.Peek().GetLine());
         _nextState.Undo();
         sortingLogic.markCurrentSubset(_executedStates.Peek().GetSubsetStart(), _executedStates.Peek().GetSubsetEnd());
+        sortingLogic.displayIndices(_executedStates.Peek().GetVariables());
         if (!_nextState._requireWait)
         {
             sortingLogic.MoveFinished();
