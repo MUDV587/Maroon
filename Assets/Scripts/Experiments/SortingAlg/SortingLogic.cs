@@ -54,7 +54,7 @@ public class SortingLogic : MonoBehaviour
         CreateArray(arraySize);
         
         //TODO: Set this in a function, make it changable
-        _algorithm = new QuickSort(this, arraySize);
+        _algorithm = new InsertionSort(this, arraySize);
         _currentlySorting = true;
         setPseudocode(-1);
     }
@@ -131,7 +131,8 @@ public class SortingLogic : MonoBehaviour
     public void Insert(int fromIdx, int toIdx)
     {
         if (fromIdx < 0 || fromIdx >= _arrayPlaces.Count || !_arrayPlaces[fromIdx].isActiveAndEnabled ||
-            toIdx < 0 || toIdx >= _arrayPlaces.Count || !_arrayPlaces[toIdx].isActiveAndEnabled)
+            toIdx < 0 || toIdx >= _arrayPlaces.Count || !_arrayPlaces[toIdx].isActiveAndEnabled ||
+            fromIdx == toIdx)
         {
             _waitForMachine = false;
             return;

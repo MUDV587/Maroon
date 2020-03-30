@@ -55,8 +55,8 @@ public abstract class SortingAlgorithm
         public virtual void Execute() {}
         public virtual void Undo() {}
         
-        public virtual int GetSubsetStart() {return 0;}
-        public virtual int GetSubsetEnd() {return 0;}
+        public virtual int GetSubsetStart() {return -1;}
+        public virtual int GetSubsetEnd() {return -1;}
         
         public virtual int GetPivot() {return -1;}
 

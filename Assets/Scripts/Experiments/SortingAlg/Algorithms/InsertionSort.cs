@@ -11,9 +11,9 @@ public class InsertionSort : SortingAlgorithm
             "<style=\"header\">Insertion Sort:</style>",
             "<style=\"command\">for</style> i = <style=\"number\">1</style> .. <style=\"command\">len</style>(A)-<style=\"number\">1</style>:",
             "    j = i-<style=\"number\">1</style>",
-            "    <style=\"command\">while</style> A[j]>A[j+1] <style=\"command\">and</style> j>=0:",
-            "        <style=\"function\">swap</style>(A[j+1],A[j])",
-            "        j = j-<style=\"number\">1</style>"
+            "    <style=\"command\">while</style> A[j]>A[i] <style=\"command\">and</style> j>=<style=\"number\">0</style>:",
+            "        j = j-<style=\"number\">1</style>",
+            "    <style=\"function\">insert</style>(i,j+<style=\"number\">1</style>)"
         };
     }
     
@@ -70,30 +70,30 @@ public class InsertionSort : SortingAlgorithm
                     
                     _nextLine = SortingStateLine.SS_Line3;
                     break;
-                case SortingStateLine.SS_Line3: // while A[j]>A[j+1] and j>=0:
+                case SortingStateLine.SS_Line3: // while A[j]>A[i] and j>=0:
                     if (j < 0)
                     {
-                        _nextLine = SortingStateLine.SS_Line1;
+                        _nextLine = SortingStateLine.SS_Line5;
                         break;
                     }
                     _requireWait = true;
-                    if (_algorithm.CompareGreater(j, j + 1))
+                    if (_algorithm.CompareGreater(j, i))
                     {
                         _nextLine = SortingStateLine.SS_Line4;
                     }
                     else
                     {
-                        _nextLine = SortingStateLine.SS_Line1;
+                        _nextLine = SortingStateLine.SS_Line5;
                     }
                     break;
-                case SortingStateLine.SS_Line4: // swap A[j+1] and A[j]
-                    _requireWait = true;
-                    _algorithm.Swap(j+1, j);
-                    _nextLine = SortingStateLine.SS_Line5;
-                    break;
-                case SortingStateLine.SS_Line5: // j = j-1
+                case SortingStateLine.SS_Line4: // j = j-1
                     j--;
                     _nextLine = SortingStateLine.SS_Line3;
+                    break;
+                case SortingStateLine.SS_Line5: //insert(i,j+1)
+                    _requireWait = true;
+                    _algorithm.Insert(i,j+1);
+                    _nextLine = SortingStateLine.SS_Line1;
                     break;
                 case SortingStateLine.SS_None:
                     break;
@@ -106,6 +106,8 @@ public class InsertionSort : SortingAlgorithm
         
         public override void Undo()
         {
+            int j = _variables["j"];
+            int i = _variables["i"];
             _requireWait = false;
             switch (_line)
             {
@@ -113,14 +115,13 @@ public class InsertionSort : SortingAlgorithm
                     break;
                 case SortingStateLine.SS_Line2: // j = i-1
                     break;
-                case SortingStateLine.SS_Line3: // while A[j]>A[j+1] and j>=0:
+                case SortingStateLine.SS_Line3: // while A[j]>A[i] and j>=0:
                     break;
-                case SortingStateLine.SS_Line4: // swap A[j+1] and A[j]
-                    int j = _variables["j"];
+                case SortingStateLine.SS_Line4: // j = j-1
+                    break;
+                case SortingStateLine.SS_Line5: // //insert(i,j+1)
                     _requireWait = true;
-                    _algorithm.UndoSwap(j+1, j);
-                    break;
-                case SortingStateLine.SS_Line5: // j = j-1
+                    _algorithm.UndoInsert(i,j+1);
                     break;
                 case SortingStateLine.SS_None:
                     break;
