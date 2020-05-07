@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class scrSegmentBuilder : MonoBehaviour
 {
@@ -48,12 +49,12 @@ public class scrSegmentBuilder : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        this.BuildAllSegments();
+        StartCoroutine(this.BuildAllSegments());
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Builds all segments according to the members
-    public void BuildAllSegments()
+    public IEnumerator BuildAllSegments()
     {
         // Calculate number of segments to be generated
         this.numberSegmentsTotal = Mathf.CeilToInt(this.prefabsExperimentPreview.Length / 2.0F);
@@ -73,6 +74,9 @@ public class scrSegmentBuilder : MonoBehaviour
             {
                 this.AddSegment(this.prefabsExperimentPreview[this.numberDynamicSegments * 2], this.prefabEmptyPreview);                
             }
+
+            // Wait before adding next segment
+            yield return new WaitForSeconds(1);
 
             // Update segment counter
             this.numberDynamicSegments += 1;

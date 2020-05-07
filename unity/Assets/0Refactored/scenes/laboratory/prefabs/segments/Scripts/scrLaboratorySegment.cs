@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class scrLaboratorySegment : MonoBehaviour
@@ -7,22 +6,40 @@ public class scrLaboratorySegment : MonoBehaviour
     // #################################################################################################################
     // Members
 
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Settings
+
+    // Length of this segment
     [SerializeField] private int segmentLength;
 
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Constants
+
+    // Length of a small segment
     private const int segmentLengthSmall = 4;
+
+    // length of a large segment
     private const int segmentLengthLarge = 8;
 
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Current values
+
+    // Index of the segment after insertion
     private int targetIndex = 0;
+
+    // Z position of the segment after insertion
     private int targetForwardTranslation = 0;
+
+    // True if moved to target position
     private bool movedToTargetForwardTranslation = false;
+
+    // True if currently moving
     private bool animationActive = false;
 
     // #################################################################################################################
     // Methods: Previews in segment
 
+    // Adds a preview to the segment
     public void AddPreview(GameObject prefabPreview, bool isRight = false)
     {
         // Instantiate new preview
@@ -42,7 +59,7 @@ public class scrLaboratorySegment : MonoBehaviour
     }
 
     // #################################################################################################################
-    // Methods: Index, position and movement
+    // Methods: Index, position
 
     // Sets target index and re-calculates target forward translation
     public void setTargetIndexAndForwardTranslation(int targetIndex)
@@ -89,8 +106,11 @@ public class scrLaboratorySegment : MonoBehaviour
         }
     }
 
+    // #################################################################################################################
+    // Methods: Movement
+
     // Animation coroutine
-    IEnumerator AnimateTranslation() 
+    private IEnumerator AnimateTranslation() 
     {
         while(true)
         {
