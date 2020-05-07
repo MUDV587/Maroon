@@ -21,7 +21,7 @@ public class scrSegmentBuilder : MonoBehaviour
     [SerializeField] private GameObject prefabEmptyPreview;
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Counters
+    // Counters (exclude start and end segment)
     private int numberSegmentsTotal;
     private int numberSegmentsCurrent = 0;
 
@@ -78,11 +78,10 @@ public class scrSegmentBuilder : MonoBehaviour
         this.AddPreview(new_segment, prefabPreviewLeft);
         this.AddPreview(new_segment, prefabPreviewRight, true);
 
-        // Move to fit start transform
-        new_segment.transform.position += new_segment.transform.forward * 4;
-
-        // Move to fit previous segments
-        new_segment.transform.position += new_segment.transform.forward * this.numberSegmentsCurrent * 8;
+        // Move correct position
+        var segment_script = (scrLaboratorySegment) new_segment.GetComponent(typeof(scrLaboratorySegment));
+        segment_script.setTargetIndexAndForwardTranslation(this.numberSegmentsCurrent + 1);
+        segment_script.moveToTargetForwardTranslation(animate);
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
