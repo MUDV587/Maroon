@@ -21,7 +21,28 @@ public class scrLaboratorySegment : MonoBehaviour
     private bool animationActive = false;
 
     // #################################################################################################################
-    // Methods
+    // Methods: Previews in segment
+
+    public void AddPreview(GameObject prefabPreview, bool isRight = false)
+    {
+        // Instantiate new preview
+        GameObject new_preview = Instantiate(prefabPreview, this.gameObject.transform.position, Quaternion.identity,
+                                             this.gameObject.transform);
+
+        // Remove editor only stuff
+        new_preview.transform.GetChild(0).gameObject.SetActive(false);
+        
+        // Rotate preview for other side
+        if(isRight)
+        {
+            new_preview.transform.position = this.gameObject.transform.position +
+                                             new Vector3(0, 0, scrLaboratorySegment.segmentLengthLarge);
+            new_preview.transform.rotation = new Quaternion(0, 180, 0, 0);
+        }
+    }
+
+    // #################################################################################################################
+    // Methods: Index, position and movement
 
     // Sets target index and re-calculates target forward translation
     public void setTargetIndexAndForwardTranslation(int targetIndex)
@@ -54,7 +75,7 @@ public class scrLaboratorySegment : MonoBehaviour
         // If animation
         if(animate)
         {
-            // TODO
+            this.animationActive = true;
         }
 
         // If instant jump to position
@@ -69,6 +90,23 @@ public class scrLaboratorySegment : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-    // TODO 
-    }
+        if(this.animationActive)
+        {
+            // Calculate target and distance
+            Vector3 vec_target = Vector3.zero + this.gameObject.transform.forward * this.targetForwardTranslation;
+            float distance = Vector3.Distance(vec_target, this.gameObject.transform.position);
+
+            // Move closer by half the distance
+            this.gameObject.transform.position -= this.gameObject.transform.forward * 
+                                                  (float)(distance * 0.5F * Time.deltaTime * 2.0F);
+
+            // Check if close enough and end animation
+            if(distance < 0.08F)
+            {
+                this.gameObject.transform.position = vec_target;
+                this.movedToTargetForwardTranslation = true;
+                this.animationActive = false;
+            }
+        }
+   }
 }
