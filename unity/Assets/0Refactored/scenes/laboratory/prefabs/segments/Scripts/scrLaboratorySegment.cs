@@ -70,12 +70,14 @@ public class scrLaboratorySegment : MonoBehaviour
         this.movedToTargetForwardTranslation = false;
     }
 
+    // Moves segment to target location or starts animation to target location
     public void moveToTargetForwardTranslation(bool animate = false)
     {
         // If animation
         if(animate)
         {
             this.animationActive = true;
+            StartCoroutine(this.AnimateTranslation());
         }
 
         // If instant jump to position
@@ -87,10 +89,10 @@ public class scrLaboratorySegment : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    // Animation coroutine
+    IEnumerator AnimateTranslation() 
     {
-        if(this.animationActive)
+        while(true)
         {
             // Calculate target and distance
             Vector3 vec_target = Vector3.zero + this.gameObject.transform.forward * this.targetForwardTranslation;
@@ -98,15 +100,22 @@ public class scrLaboratorySegment : MonoBehaviour
 
             // Move closer by half the distance
             this.gameObject.transform.position -= this.gameObject.transform.forward * 
-                                                  (float)(distance * 0.5F * Time.deltaTime * 2.0F);
+                                                    (float)(distance * 0.5F * Time.deltaTime * 2.0F);
 
-            // Check if close enough and end animation
-            if(distance < 0.08F)
+            // If not close enough to target location
+            if(distance > 0.08F)
+            {
+                yield return new WaitForEndOfFrame();
+            }
+
+            // If close enough to target location
+            else
             {
                 this.gameObject.transform.position = vec_target;
                 this.movedToTargetForwardTranslation = true;
                 this.animationActive = false;
+                break;
             }
         }
-   }
+    }
 }
