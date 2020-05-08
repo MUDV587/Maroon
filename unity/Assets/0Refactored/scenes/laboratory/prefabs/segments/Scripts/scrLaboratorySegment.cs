@@ -118,13 +118,19 @@ public class scrLaboratorySegment : MonoBehaviour
             Vector3 vec_target = Vector3.zero + this.gameObject.transform.forward * this.targetForwardTranslation;
             float distance = Vector3.Distance(vec_target, this.gameObject.transform.position);
 
-            // Move closer by half the distance
-            this.gameObject.transform.position -= this.gameObject.transform.forward * 
-                                                    (float)(distance * 0.5F * Time.deltaTime * 2.0F);
-
-            // If not close enough to target location
-            if(distance > 0.08F)
+            // From infinity to 1m
+            if(distance > 1.0F)
             {
+                // Move closer by current distance per second
+                this.gameObject.transform.position -= this.gameObject.transform.forward * distance * Time.deltaTime;
+                yield return new WaitForEndOfFrame();
+            }
+
+            // From 1m to 0.08m
+            else if(distance > 0.08F)
+            {
+                // Move closer by 1 meter per second
+                this.gameObject.transform.position -= this.gameObject.transform.forward * 1 * Time.deltaTime;
                 yield return new WaitForEndOfFrame();
             }
 

@@ -7,6 +7,11 @@ public class scrSegmentBuilder : MonoBehaviour
     // Members
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Settings
+
+    public bool animate;
+
+    // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Previews
 
     // Experiment previews to be displayed
@@ -59,6 +64,9 @@ public class scrSegmentBuilder : MonoBehaviour
         // Calculate number of segments to be generated
         this.numberSegmentsTotal = Mathf.CeilToInt(this.prefabsExperimentPreview.Length / 2.0F);
 
+        // Hide segment end
+        this.staticSegmentEnd.SetActive(false);
+
         // Generate segments
         while(this.numberDynamicSegments < numberSegmentsTotal)
         {
@@ -66,32 +74,45 @@ public class scrSegmentBuilder : MonoBehaviour
             if((this.prefabsExperimentPreview.Length - (this.numberDynamicSegments * 2)) >= 2)
             {
                 this.AddSegment(this.prefabsExperimentPreview[this.numberDynamicSegments * 2],
-                                this.prefabsExperimentPreview[this.numberDynamicSegments * 2 + 1]);
+                                this.prefabsExperimentPreview[this.numberDynamicSegments * 2 + 1],
+                                this.animate);
             }
 
             // If one preview left
             else
             {
-                this.AddSegment(this.prefabsExperimentPreview[this.numberDynamicSegments * 2], this.prefabEmptyPreview);                
+                this.AddSegment(this.prefabsExperimentPreview[this.numberDynamicSegments * 2],
+                                this.prefabEmptyPreview,
+                                this.animate);                
             }
 
             // Wait before adding next segment
-            yield return new WaitForSeconds(1);
+            if(this.animate)
+            {
+                yield return new WaitForSeconds(1);
+            }
 
             // Update segment counter
             this.numberDynamicSegments += 1;
         }
+
+        // Show segment end
+        if(this.animate)
+        {
+            yield return new WaitForSeconds(6);
+        }
+        this.staticSegmentEnd.SetActive(true);
     }
 
     // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Adds one segment to the room
-    private void AddSegment(GameObject prefabPreviewLeft, GameObject prefabPreviewRight, bool animate = true)
+    private void AddSegment(GameObject prefabPreviewLeft, GameObject prefabPreviewRight, bool animate = false)
     {
         // Move end segment forward
         this.staticSegmentEnd.transform.position += this.staticSegmentEnd.transform.forward * 8;
 
         // Create new segment
-        GameObject new_segment = Instantiate(this.prefabSegment, new Vector3(0, 0, 1000), Quaternion.identity);
+        GameObject new_segment = Instantiate(this.prefabSegment, new Vector3(0, 0, 500), Quaternion.identity);
         new_segment.transform.SetParent(this.staticSegmentContainer.transform);
         var segment_script = (scrLaboratorySegment) new_segment.GetComponent(typeof(scrLaboratorySegment));
 
