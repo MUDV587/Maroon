@@ -8175,7 +8175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e50940a7d84ee9d418c8a3a9a8df418a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animate: 1
+  animate: 0
   prefabsExperimentPreview:
   - {fileID: 2472272282694686498, guid: 7cad91f78c3a3534c885f6e725f5e2fb, type: 3}
   - {fileID: 8757998023392444812, guid: 5479b3a0356af9246bddaede93c4df0d, type: 3}
